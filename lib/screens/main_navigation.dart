@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
 import 'dashboard_screen.dart';
+import 'scoreboard_screen.dart';
+import 'task_list_screen.dart';
+import 'profile_screen.dart';
+
+
+
 
 class MainNavigation extends StatefulWidget {
   const MainNavigation({super.key});
@@ -13,9 +19,9 @@ class _MainNavigationState extends State<MainNavigation> {
 
   final List<Widget> _pages = [
     const DashboardScreen(),
-    Center(child: Text("Aufgaben")),
-    Center(child: Text("Scoreboard")),
-    Center(child: Text("Profil")),
+    const TaskListScreen(),
+    const ScoreboardScreen(),
+    const ProfileScreen(),
   ];
 
   @override
@@ -23,7 +29,7 @@ class _MainNavigationState extends State<MainNavigation> {
     return Scaffold(
       body: _pages[_currentIndex],
       bottomNavigationBar: Container(
-        color: const Color.fromARGB(244, 39, 5, 99), // 💜 DEIN LILA
+        color: const Color.fromARGB(255, 34, 21, 53),
         child: BottomNavigationBar(
           backgroundColor: Colors.transparent,
           type: BottomNavigationBarType.fixed,
