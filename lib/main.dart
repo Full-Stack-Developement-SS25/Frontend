@@ -13,7 +13,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'PromptMaster',
-      theme: ThemeData(primarySwatch: Colors.deepPurple),
+      theme: ThemeData(),
       home: MainNavigation(), // <- wichtig!
     );
   }

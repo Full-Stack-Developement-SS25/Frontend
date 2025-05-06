@@ -22,21 +22,34 @@ class _MainNavigationState extends State<MainNavigation> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: _pages[_currentIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: (index) => setState(() => _currentIndex = index),
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.dashboard),
-            label: "Dashboard",
-          ),
-          BottomNavigationBarItem(icon: Icon(Icons.task), label: "Aufgaben"),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.leaderboard),
-            label: "Scoreboard",
-          ),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profil"),
-        ],
+      bottomNavigationBar: Container(
+        color: const Color.fromARGB(244, 39, 5, 99), // 💜 DEIN LILA
+        child: BottomNavigationBar(
+          backgroundColor: Colors.transparent,
+          type: BottomNavigationBarType.fixed,
+          elevation: 0,
+          selectedItemColor: const Color.fromARGB(
+            255,
+            213,
+            111,
+            15,
+          ), // 🧡 DEIN ORANGE
+          unselectedItemColor: Colors.white,
+          currentIndex: _currentIndex,
+          onTap: (index) => setState(() => _currentIndex = index),
+          items: const [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.dashboard),
+              label: "Dashboard",
+            ),
+            BottomNavigationBarItem(icon: Icon(Icons.task), label: "Aufgaben"),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.leaderboard),
+              label: "Scoreboard",
+            ),
+            BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profil"),
+          ],
+        ),
       ),
     );
   }
