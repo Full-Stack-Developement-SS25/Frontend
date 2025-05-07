@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import './/utils/app_colors.dart';
+import 'login_screen.dart'; // Importiere die Login-Seite
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -61,6 +62,19 @@ class ProfileScreen extends StatelessWidget {
                 foregroundColor: Colors.white,
               ),
             ),
+            const SizedBox(height: 30),
+            ElevatedButton.icon(
+              onPressed: () {
+                // TODO: Backend-Logout-Logik
+                _logout(context); // Zum Login-Screen navigieren
+              },
+              icon: const Icon(Icons.exit_to_app),
+              label: const Text("Logout"),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.accent,
+                foregroundColor: Colors.white,
+              ),
+            ),
           ],
         ),
       ),
@@ -78,6 +92,19 @@ class ProfileScreen extends StatelessWidget {
           Text(value, style: const TextStyle(color: Colors.white)),
         ],
       ),
+    );
+  }
+
+  // Logout-Logik: Benutzer ausloggen und zurück zur Login-Seite
+  void _logout(BuildContext context) {
+    // Hier wird die Backend-Logout-Logik eingefügt (z.B. JWT-Token löschen)
+    // Zum Beispiel:
+    // AuthService.logout();
+
+    // Nach dem Logout zurück zur Login-Seite
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => const LoginScreen()),
     );
   }
 }
