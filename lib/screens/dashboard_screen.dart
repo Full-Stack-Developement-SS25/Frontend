@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 import 'task_screen.dart';
-
+import './/utils/app_colors.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -14,11 +14,11 @@ class DashboardScreen extends StatelessWidget {
     final double progress = xp / xpNeeded;
 
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 34, 21, 53),
+      backgroundColor: AppColors.primaryBackground,
       appBar: AppBar(
         title: const Text("Dashboard"),
-        backgroundColor: const Color.fromARGB(255, 34, 21, 53),
-        foregroundColor:  const Color.fromARGB(255, 221, 115, 45),
+        backgroundColor: AppColors.primaryBackground,
+        foregroundColor: AppColors.accent,
         elevation: 0,
       ),
       body: Padding(
@@ -28,14 +28,12 @@ class DashboardScreen extends StatelessWidget {
           children: [
             const Text(
               "Level: 1",
-              style: TextStyle(fontSize: 20, color:  const Color.fromARGB(255, 221, 115, 45),
-              ),
+              style: TextStyle(fontSize: 20, color: AppColors.accent),
             ),
             const SizedBox(height: 10),
             Text(
               "XP: $xp / $xpNeeded",
-              style: const TextStyle(color:  const Color.fromARGB(255, 221, 115, 45),
-              ),
+              style: const TextStyle(color: AppColors.accent),
             ),
             const SizedBox(height: 10),
             LinearPercentIndicator(
@@ -44,12 +42,11 @@ class DashboardScreen extends StatelessWidget {
               lineHeight: 100.0,
               percent: progress.clamp(0.0, 1.0),
               backgroundColor: Colors.white24,
-              progressColor: const Color.fromARGB(255, 221, 115, 45),
+              progressColor: AppColors.accent,
               barRadius: const Radius.circular(15),
               center: Text(
                 "${(progress * 100).round()}%",
-                style: const TextStyle(color:  const Color.fromARGB(255, 221, 115, 45),
-                ),
+                style: const TextStyle(color: AppColors.accent),
               ),
             ),
             const SizedBox(height: 20),
@@ -58,7 +55,7 @@ class DashboardScreen extends StatelessWidget {
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 18,
-                color:  const Color.fromARGB(255, 221, 115, 45),
+                color: AppColors.textPrimary,
               ),
             ),
             const SizedBox(height: 10),
@@ -96,12 +93,15 @@ class TaskCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      color:  const Color.fromARGB(255, 221, 115, 45),
+      color: AppColors.accent,
       margin: const EdgeInsets.symmetric(vertical: 8),
       child: ListTile(
-        title: Text(title),
-        subtitle: Text("Schwierigkeit: $difficulty"),
-        trailing: const Icon(Icons.arrow_forward_ios),
+        title: Text(title, style: TextStyle(color: AppColors.textPrimary)),
+        subtitle: Text(
+          "Schwierigkeit: $difficulty",
+          style: TextStyle(color: AppColors.textSecondary),
+        ),
+        trailing: const Icon(Icons.arrow_forward_ios, color: Colors.white),
         onTap: () {
           Navigator.push(
             context,
@@ -111,7 +111,6 @@ class TaskCard extends StatelessWidget {
             ),
           );
         },
-
       ),
     );
   }

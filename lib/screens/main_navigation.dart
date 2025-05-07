@@ -3,9 +3,7 @@ import 'dashboard_screen.dart';
 import 'scoreboard_screen.dart';
 import 'task_list_screen.dart';
 import 'profile_screen.dart';
-
-
-
+import './/utils/app_colors.dart';
 
 class MainNavigation extends StatefulWidget {
   const MainNavigation({super.key});
@@ -29,18 +27,13 @@ class _MainNavigationState extends State<MainNavigation> {
     return Scaffold(
       body: _pages[_currentIndex],
       bottomNavigationBar: Container(
-        color: const Color.fromARGB(255, 34, 21, 53),
+        color: AppColors.primaryBackground,
         child: BottomNavigationBar(
           backgroundColor: Colors.transparent,
           type: BottomNavigationBarType.fixed,
           elevation: 0,
-          selectedItemColor: const Color.fromARGB(
-            255,
-            213,
-            111,
-            15,
-          ), // 🧡 DEIN ORANGE
-          unselectedItemColor: Colors.white,
+          selectedItemColor: AppColors.accent,
+          unselectedItemColor: AppColors.textPrimary,
           currentIndex: _currentIndex,
           onTap: (index) => setState(() => _currentIndex = index),
           items: const [

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import './/utils/app_colors.dart';
 
 class TaskScreen extends StatelessWidget {
   final String title;
@@ -9,11 +10,11 @@ class TaskScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 34, 21, 53),
+      backgroundColor: AppColors.primaryBackground,
       appBar: AppBar(
         title: Text(title),
-        backgroundColor: const Color.fromARGB(255, 34, 21, 53),
-        foregroundColor: const Color.fromARGB(255, 221, 115, 45),
+        backgroundColor: AppColors.primaryBackground,
+        foregroundColor: AppColors.accent,
         elevation: 0,
       ),
       body: Padding(
@@ -23,10 +24,7 @@ class TaskScreen extends StatelessWidget {
           children: [
             Text(
               "Schwierigkeit: $difficulty",
-              style: const TextStyle(
-                fontSize: 16,
-                color: Color.fromARGB(255, 221, 115, 45),
-              ),
+              style: TextStyle(fontSize: 16, color: AppColors.accent),
             ),
             const SizedBox(height: 20),
             const Text(
@@ -48,7 +46,7 @@ class TaskScreen extends StatelessWidget {
               maxLines: 5,
               decoration: InputDecoration(
                 filled: true,
-                fillColor: Color.fromARGB(60, 255, 255, 255),
+                fillColor: AppColors.fillColor,
                 hintText: "Dein Prompt...",
                 hintStyle: TextStyle(color: Colors.white54),
                 border: OutlineInputBorder(),
@@ -60,7 +58,7 @@ class TaskScreen extends StatelessWidget {
                 // TODO: Prompt bewerten
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: Color.fromARGB(255, 221, 115, 45),
+                backgroundColor: AppColors.accent,
               ),
               child: const Text("Senden"),
             ),

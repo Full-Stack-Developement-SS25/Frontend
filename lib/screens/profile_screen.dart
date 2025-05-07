@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import './/utils/app_colors.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -13,11 +14,11 @@ class ProfileScreen extends StatelessWidget {
     final int badges = 1;
 
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 34, 21, 53),
+      backgroundColor: AppColors.primaryBackground,
       appBar: AppBar(
         title: const Text("Profil"),
-        backgroundColor: const Color.fromARGB(255, 34, 21, 53),
-        foregroundColor: const Color.fromARGB(255, 221, 115, 45),
+        backgroundColor: AppColors.primaryBackground,
+        foregroundColor: AppColors.accent,
         elevation: 0,
       ),
       body: Padding(
@@ -27,10 +28,14 @@ class ProfileScreen extends StatelessWidget {
           children: [
             Row(
               children: [
-                const CircleAvatar(
+                CircleAvatar(
                   radius: 30,
-                  backgroundColor: Color.fromARGB(255, 221, 115, 45),
-                  child: Icon(Icons.person, size: 30, color: Colors.white),
+                  backgroundColor: AppColors.accent,
+                  child: const Icon(
+                    Icons.person,
+                    size: 30,
+                    color: Colors.white,
+                  ),
                 ),
                 const SizedBox(width: 16),
                 Text(
@@ -52,7 +57,7 @@ class ProfileScreen extends StatelessWidget {
               icon: const Icon(Icons.upgrade),
               label: const Text("Upgrade auf Pro"),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color.fromARGB(255, 221, 115, 45),
+                backgroundColor: AppColors.accent,
                 foregroundColor: Colors.white,
               ),
             ),

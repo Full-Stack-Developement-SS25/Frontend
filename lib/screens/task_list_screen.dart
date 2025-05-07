@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'task_screen.dart'; // für Detailnavigation
+import './/utils/app_colors.dart'; // Achte darauf, den richtigen Pfad zu verwenden
 
 class TaskListScreen extends StatelessWidget {
   const TaskListScreen({super.key});
@@ -16,11 +17,15 @@ class TaskListScreen extends StatelessWidget {
     ];
 
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 34, 21, 53),
+      backgroundColor:
+          AppColors.primaryBackground, 
       appBar: AppBar(
         title: const Text("Aufgaben"),
-        backgroundColor: const Color.fromARGB(255, 34, 21, 53),
-        foregroundColor: const Color.fromARGB(255, 221, 115, 45),
+        backgroundColor:
+            AppColors
+                .primaryBackground, 
+        foregroundColor:
+            AppColors.accent, 
         elevation: 0,
       ),
       body: ListView.builder(
@@ -28,20 +33,25 @@ class TaskListScreen extends StatelessWidget {
         itemBuilder: (context, index) {
           final task = tasks[index];
           return Card(
-            color: const Color.fromARGB(255, 221, 115, 45),
+            color: AppColors.accent, 
             margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: ListTile(
               title: Text(
                 task["title"]!,
-                style: const TextStyle(color: Colors.white),
+                style: TextStyle(
+                  color: AppColors.textPrimary, 
+                ),
               ),
               subtitle: Text(
                 "Schwierigkeit: ${task["difficulty"]}",
-                style: const TextStyle(color: Colors.white70),
+                style: TextStyle(
+                  color:
+                      AppColors.textSecondary, 
+                ),
               ),
               trailing: const Icon(
                 Icons.arrow_forward_ios,
-                color: Colors.white,
+                color: Colors.white, 
               ),
               onTap: () {
                 Navigator.push(

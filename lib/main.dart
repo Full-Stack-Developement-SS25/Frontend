@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'screens/login_screen.dart'; // <-- Importiere den neuen Screen
+import 'screens/login_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -14,7 +14,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'PromptMaster',
       theme: ThemeData(),
-      home: const LoginScreen(), // <- LoginScreen statt MainNavigation
+      home: const LoginScreen(), // Start Screen
     );
   }
 }
