@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:prompt_master/services/auth_service.dart';
 import './/utils/app_colors.dart';
 import 'login_screen.dart'; // Importiere die Login-Seite
 
@@ -97,10 +98,7 @@ class ProfileScreen extends StatelessWidget {
 
   // Logout-Logik: Benutzer ausloggen und zurück zur Login-Seite
   void _logout(BuildContext context) {
-    // Hier wird die Backend-Logout-Logik eingefügt (z.B. JWT-Token löschen)
-    // Zum Beispiel:
-    // AuthService.logout();
-
+    AuthService.logout();
     // Nach dem Logout zurück zur Login-Seite
     Navigator.pushReplacement(
       context,

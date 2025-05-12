@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:email_validator/email_validator.dart';
 import 'main_navigation.dart';
@@ -16,26 +15,25 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+  final TextEditingController usernameController =
+      TextEditingController(); // NEU
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
-  bool isPasswordVisible = false; // Zum Anzeigen/Ausblenden des Passworts
-  bool isLoginMode =
-      true; // Zur Unterscheidung zwischen Login und Registrierung
+  bool isPasswordVisible = false;
+  bool isLoginMode = true;
 
-  // Methode zur Überprüfung der E-Mail
   bool isEmailValid(String email) {
     return EmailValidator.validate(email);
   }
 
-  // Methode zur Überprüfung des Passworts
   bool isPasswordValid(String password) {
     return password.length >= 6;
   }
 
-  // Methode zur Registrierung/Login
   void handleSubmit() async {
     final email = emailController.text.trim();
     final password = passwordController.text.trim();
+    final username = usernameController.text.trim();
 
     if (!_formKey.currentState!.validate()) return;
 
@@ -43,22 +41,18 @@ class _LoginScreenState extends State<LoginScreen> {
       final response =
           isLoginMode
               ? await AuthService.login(email, password)
-              : await AuthService.register(email, password);
+              : await AuthService.register(email, password, username); // NEU
 
       if (response.statusCode == 200) {
-        final responseData = jsonDecode(response.body);
-
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
               isLoginMode
                   ? "Erfolgreich eingeloggt als $email"
-                  : "Registrierung erfolgreich. Willkommen $email!",
+                  : "Registrierung erfolgreich. Willkommen $username!",
             ),
           ),
         );
-
-        // TODO: Token speichern, falls nötig: responseData["token"]
         _navigateToDashboard(context);
       } else {
         final errorMsg =
@@ -69,18 +63,15 @@ class _LoginScreenState extends State<LoginScreen> {
       }
     } catch (e) {
       String message = e.toString();
-
       if (message.startsWith('Exception:')) {
         message = message.replaceFirst('Exception: ', '');
       }
-
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(message.trim())));
     }
   }
 
-  // Methode für Passwort vergessen
   void handleForgotPassword() {
     final email = emailController.text.trim();
     if (!isEmailValid(email)) {
@@ -90,7 +81,6 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
-    // Hier sollte die Logik für das Zurücksetzen des Passworts (z.B. per E-Mail) implementiert werden
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
@@ -98,10 +88,9 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ),
     );
-    Navigator.pop(context); // Zurück zum Login-Bildschirm
+    Navigator.pop(context);
   }
 
-  // Navigation zum Dashboard
   void _navigateToDashboard(BuildContext context) {
     Navigator.pushReplacement(
       context,
@@ -173,6 +162,27 @@ class _LoginScreenState extends State<LoginScreen> {
                   key: _formKey,
                   child: Column(
                     children: [
+                      if (!isLoginMode) ...[
+                        TextFormField(
+                          controller: usernameController,
+                          decoration: InputDecoration(
+                            filled: true,
+                            fillColor: AppColors.white,
+                            hintText: 'Benutzername',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(15),
+                              borderSide: BorderSide.none,
+                            ),
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Bitte einen Benutzernamen eingeben.';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 20),
+                      ],
                       TextFormField(
                         controller: emailController,
                         decoration: InputDecoration(
