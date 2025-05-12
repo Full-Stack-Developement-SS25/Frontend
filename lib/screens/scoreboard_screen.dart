@@ -28,11 +28,12 @@ class _ScoreboardScreenState extends State<ScoreboardScreen> {
       return data.map((user) {
         return {
           'id': user['id'],
-          'email': user['email'],
+          'username': user['username'], // 👈 NEU
           'level': user['level'],
           'xp': user['xp'],
         };
       }).toList();
+
     } else {
       throw Exception('Fehler beim Abrufen der Benutzer');
     }
@@ -96,7 +97,7 @@ class _ScoreboardScreenState extends State<ScoreboardScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              user['email'],
+                              user['username'] ?? 'Spieler $rank',
                               style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
