@@ -9,8 +9,6 @@ class AuthService {
 
   static Future<http.Response> login(String email, String password) async {
     try {
-      _log.info('Sende Login-Anfrage für $email');
-      print("Base URL: $baseUrl");
       final response = await http.post(
         Uri.parse('$baseUrl/auth/login'),
         headers: {'Content-Type': 'application/json'},
@@ -18,22 +16,20 @@ class AuthService {
       );
 
       if (response.statusCode == 200) {
-        _log.info('Login erfolgreich für $email');
         return response;
       } else {
-        _log.warning('Login fehlgeschlagen: ${response.statusCode}');
-        _log.warning('Fehlerdetails: ${response.body}');
-        throw Exception('Login fehlgeschlagen');
+        final body = json.decode(response.body);
+        final errorMsg = body['error'] ?? 'Unbekannter Fehler';
+        throw errorMsg;
       }
     } catch (error) {
-      _log.severe('Fehler bei der Login-Anfrage: $error');
-      throw Exception('Fehler bei der Login-Anfrage');
+      throw error.toString();
     }
   }
 
   static Future<http.Response> register(String email, String password) async {
     try {
-      _log.info('Sende Registrierungsanfrage für $email');
+      print('Sende Registrierungsanfrage für $email');
 
       final response = await http.post(
         Uri.parse('$baseUrl/auth/register'),
@@ -42,15 +38,15 @@ class AuthService {
       );
 
       if (response.statusCode == 200) {
-        _log.info('Registrierung erfolgreich für $email');
+        print('Registrierung erfolgreich für $email');
         return response;
       } else {
-        _log.warning('Registrierung fehlgeschlagen: ${response.statusCode}');
-        _log.warning('Fehlerdetails: ${response.body}');
+        print('Registrierung fehlgeschlagen: ${response.statusCode}');
+        print('Fehlerdetails: ${response.body}');
         throw Exception('Registrierung fehlgeschlagen');
       }
     } catch (error) {
-      _log.severe('Fehler bei der Registrierungsanfrage: $error');
+      print('Fehler bei der Registrierungsanfrage: $error');
       throw Exception('Fehler bei der Registrierungsanfrage');
     }
   }

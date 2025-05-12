@@ -68,9 +68,15 @@ class _LoginScreenState extends State<LoginScreen> {
         ).showSnackBar(SnackBar(content: Text("Fehler: $errorMsg")));
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Netzwerkfehler oder ungültige Antwort: $e")),
-      );
+      String message = e.toString();
+
+      if (message.startsWith('Exception:')) {
+        message = message.replaceFirst('Exception: ', '');
+      }
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(message.trim())));
     }
   }
 
