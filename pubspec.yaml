@@ -13,6 +13,8 @@ dependencies:
   cupertino_icons: ^1.0.8
   flutter_neumorphic: ^3.0.0 # Füge Flutter Neumorphic hier hinzu
   percent_indicator: ^4.2.2
+  mobile_scanner: ^3.5.2
+
 
 dev_dependencies:
   flutter_test:

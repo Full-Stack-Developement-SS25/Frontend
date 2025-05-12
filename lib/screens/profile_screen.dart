@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../widgets/section_header.dart';
+
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -15,7 +17,7 @@ class ProfileScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 34, 21, 53),
       appBar: AppBar(
-        title: const Text("Profil"),
+        title: const SectionHeader("Profil"),
         backgroundColor: const Color.fromARGB(255, 34, 21, 53),
         foregroundColor: const Color.fromARGB(255, 221, 115, 45),
         elevation: 0,

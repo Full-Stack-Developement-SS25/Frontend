@@ -1,17 +1,28 @@
 import 'package:flutter/material.dart';
+import '../widgets/section_header.dart';
+import '../widgets/inline_title.dart';
 
-class TaskScreen extends StatelessWidget {
+
+class TaskScreen extends StatefulWidget {
   final String title;
   final String difficulty;
 
   const TaskScreen({super.key, required this.title, required this.difficulty});
 
   @override
+  State<TaskScreen> createState() => _TaskScreenState();
+}
+
+class _TaskScreenState extends State<TaskScreen> {
+  final TextEditingController _controller = TextEditingController();
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 34, 21, 53),
       appBar: AppBar(
-        title: Text(title),
+        title: SectionHeader(widget.difficulty),
+        automaticallyImplyLeading: false,
         backgroundColor: const Color.fromARGB(255, 34, 21, 53),
         foregroundColor: const Color.fromARGB(255, 221, 115, 45),
         elevation: 0,
@@ -19,50 +30,78 @@ class TaskScreen extends StatelessWidget {
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              "Schwierigkeit: $difficulty",
-              style: const TextStyle(
-                fontSize: 16,
-                color: Color.fromARGB(255, 221, 115, 45),
-              ),
-            ),
+            InlineTitle(widget.title),
             const SizedBox(height: 20),
-            const Text(
-              "Aufgabenstellung:",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
-                color: Colors.white,
+            // ❗️Expanded mit Column, um Mitte + Footer zu erreichen
+            Expanded(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text(
+                    "Aufgabenstellung:",
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  const Text(
+                    "Formuliere einen Prompt, mit dem die KI ein Produkt kreativ beschreiben kann.",
+                    style: TextStyle(color: Colors.white),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 30),
+
+                  // 🧠 Dynamisch wachsendes Textfeld
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(
+                      minHeight: 50,
+                      maxHeight: 200,
+                    ),
+                    child: TextField(
+                      controller: _controller,
+                      style: const TextStyle(color: Colors.white),
+                      minLines: 1,
+                      maxLines: null, // macht es "auto-grow"
+                      expands: false,
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: Colors.white10,
+                        hintText: "Dein Prompt...",
+                        hintStyle: const TextStyle(color: Colors.white54),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 10),
-            const Text(
-              "Formuliere einen Prompt, mit dem die KI ein Produkt kreativ beschreiben kann.",
-              style: TextStyle(color: Colors.white),
-            ),
-            const SizedBox(height: 30),
-            const TextField(
-              style: TextStyle(color: Colors.white),
-              maxLines: 5,
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: Color.fromARGB(60, 255, 255, 255),
-                hintText: "Dein Prompt...",
-                hintStyle: TextStyle(color: Colors.white54),
-                border: OutlineInputBorder(),
+
+            // 📤 Senden-Button ganz unten, volle Breite
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () {
+                  final prompt = _controller.text.trim();
+                  debugPrint("Prompt gesendet: $prompt");
+                  // TODO: Bewertung auslösen
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color.fromARGB(255, 221, 115, 45),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text(
+                  "Senden",
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
               ),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                // TODO: Prompt bewerten
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Color.fromARGB(255, 221, 115, 45),
-              ),
-              child: const Text("Senden"),
             ),
           ],
         ),

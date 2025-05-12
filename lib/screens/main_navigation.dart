@@ -34,26 +34,28 @@ class _MainNavigationState extends State<MainNavigation> {
           backgroundColor: Colors.transparent,
           type: BottomNavigationBarType.fixed,
           elevation: 0,
+          showSelectedLabels: false,
+          showUnselectedLabels: false,
           selectedItemColor: const Color.fromARGB(
             255,
             213,
             111,
             15,
-          ), // 🧡 DEIN ORANGE
+          ),
           unselectedItemColor: Colors.white,
           currentIndex: _currentIndex,
           onTap: (index) => setState(() => _currentIndex = index),
           items: const [
             BottomNavigationBarItem(
-              icon: Icon(Icons.dashboard),
+              icon: Icon(Icons.home_rounded,  size: 50),
               label: "Dashboard",
             ),
-            BottomNavigationBarItem(icon: Icon(Icons.task), label: "Aufgaben"),
+            BottomNavigationBarItem(icon: Icon(Icons.task,  size: 40), label: "Aufgaben"),
             BottomNavigationBarItem(
-              icon: Icon(Icons.leaderboard),
+              icon: Icon(Icons.leaderboard_rounded,  size: 42),
               label: "Scoreboard",
             ),
-            BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profil"),
+            BottomNavigationBarItem(icon: Icon(Icons.person,  size: 50), label: "Profil"),
           ],
         ),
       ),
