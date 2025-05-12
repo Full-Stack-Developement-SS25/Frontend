@@ -21,7 +21,7 @@ class _ScoreboardScreenState extends State<ScoreboardScreen> {
   }
 
   Future<List<Map<String, dynamic>>> fetchScoreboard() async {
-    final response = await http.get(Uri.parse('$apiBaseUrl/api/users'));
+    final response = await http.get(Uri.parse('$apiBaseUrl/api/user'));
 
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body);
@@ -44,7 +44,7 @@ class _ScoreboardScreenState extends State<ScoreboardScreen> {
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 34, 21, 53),
       appBar: AppBar(
-        title: const SectionHeader("Startseite"),
+        title: const SectionHeader("Leaderboard"),
         backgroundColor: const Color.fromARGB(255, 34, 21, 53),
         foregroundColor: const Color.fromARGB(255, 221, 115, 45),
         elevation: 0,

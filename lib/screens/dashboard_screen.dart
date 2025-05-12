@@ -7,10 +7,8 @@ import '../widgets/task_card.dart';
 import '../config.dart';
 
 // Dummy-Wert: Ersetze durch tatsächliche User-ID
-const String userId = '230acf54-5209-4c2a-ac96-e03c04f48ba5';
+const String userId = '345a0bd4-1e3e-4ede-b822-b6ed2cf0ab15';
 
-// API-Endpunkt (bei Emulator: IP deines PCs nutzen)
-const String apiBaseUrl = 'http://10.0.2.2:3001';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -32,10 +30,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
     print('Starte API Call...');  // Debug-Ausgabe
 
     final response = await http.get(
-      Uri.parse('$apiBaseUrl/api/users/$userId'),
+      Uri.parse('$apiBaseUrl/api/user/$userId'),
     );
 
-    // Gib Statuscode und Antwortbody in der Konsole aus
     print('Statuscode: ${response.statusCode}');
     print('Antwort: ${response.body}');
 
@@ -49,6 +46,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       throw Exception('Fehler beim Abrufen der User-Daten');
     }
   }
+
 
 
 
