@@ -1,7 +1,10 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:email_validator/email_validator.dart';
 import 'main_navigation.dart';
 import './/utils/app_colors.dart';
+import './/services/auth_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -19,11 +22,6 @@ class _LoginScreenState extends State<LoginScreen> {
   bool isLoginMode =
       true; // Zur Unterscheidung zwischen Login und Registrierung
 
-  // Dummy-Datenbank (in der Praxis solltest du eine echte Datenbank oder API verwenden)
-  final List<Map<String, String>> users = [
-    {"email": "test@example.com", "password": "password123"},
-  ];
-
   // Methode zur Überprüfung der E-Mail
   bool isEmailValid(String email) {
     return EmailValidator.validate(email);
@@ -35,50 +33,44 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   // Methode zur Registrierung/Login
-  void handleSubmit() {
+  void handleSubmit() async {
     final email = emailController.text.trim();
     final password = passwordController.text.trim();
 
-    if (!_formKey.currentState!.validate()) {
-      return;
-    }
+    if (!_formKey.currentState!.validate()) return;
 
-    // Überprüfen, ob die E-Mail in der Dummy-Datenbank existiert
-    final existingUser = users.firstWhere(
-      (user) => user['email'] == email,
-      orElse: () => {},
-    ); // Falls der Benutzer nicht existiert, gibt es ein leeres Map zurück
+    try {
+      final response =
+          isLoginMode
+              ? await AuthService.login(email, password)
+              : await AuthService.register(email, password);
 
-    if (existingUser.isNotEmpty) {
-      // Wenn der Benutzer existiert, logge ihn ein
-      if (existingUser['password'] == password) {
-        // Erfolgreiches Login
+      if (response.statusCode == 200) {
+        final responseData = jsonDecode(response.body);
+
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Erfolgreich eingeloggt als $email")),
+          SnackBar(
+            content: Text(
+              isLoginMode
+                  ? "Erfolgreich eingeloggt als $email"
+                  : "Registrierung erfolgreich. Willkommen $email!",
+            ),
+          ),
         );
+
+        // TODO: Token speichern, falls nötig: responseData["token"]
         _navigateToDashboard(context);
       } else {
-        // Falsches Passwort
+        final errorMsg =
+            jsonDecode(response.body)['message'] ?? "Unbekannter Fehler";
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text("Falsches Passwort!")));
+        ).showSnackBar(SnackBar(content: Text("Fehler: $errorMsg")));
       }
-    } else {
-      // Wenn der Benutzer nicht existiert, registriere ihn
-      if (isLoginMode) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("E-Mail existiert nicht. Registrieren!")),
-        );
-      } else {
-        // Registrierung des Benutzers (dummy)
-        setState(() {
-          users.add({"email": email, "password": password});
-        });
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text("Erfolgreich registriert!")));
-        _navigateToDashboard(context);
-      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Netzwerkfehler oder ungültige Antwort: $e")),
+      );
     }
   }
 
