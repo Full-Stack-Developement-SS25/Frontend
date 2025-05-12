@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:percent_indicator/percent_indicator.dart';
 import '../widgets/section_header.dart';
 import '../widgets/task_card.dart';
+import '../config.dart';
 
 // Dummy-Wert: Ersetze durch tatsächliche User-ID
 const String userId = '230acf54-5209-4c2a-ac96-e03c04f48ba5';
@@ -31,7 +32,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     print('Starte API Call...');  // Debug-Ausgabe
 
     final response = await http.get(
-      Uri.parse('$apiBaseUrl/api/user/$userId'),
+      Uri.parse('$apiBaseUrl/api/users/$userId'),
     );
 
     // Gib Statuscode und Antwortbody in der Konsole aus
