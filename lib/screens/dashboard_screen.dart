@@ -1,124 +1,181 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:percent_indicator/percent_indicator.dart';
-import 'task_screen.dart';
-import '../widgets/task_card.dart';
 import '../widgets/section_header.dart';
+import '../widgets/task_card.dart';
 
+// Dummy-Wert: Ersetze durch tatsächliche User-ID
+const String userId = '230acf54-5209-4c2a-ac96-e03c04f48ba5';
 
+// API-Endpunkt (bei Emulator: IP deines PCs nutzen)
+const String apiBaseUrl = 'http://10.0.2.2:3001';
 
-class DashboardScreen extends StatelessWidget {
+class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final int xp = 30;
-    final int xpNeeded = 100;
-    final double progress = xp / xpNeeded;
+  State<DashboardScreen> createState() => _DashboardScreenState();
+}
 
+class _DashboardScreenState extends State<DashboardScreen> {
+  late Future<Map<String, dynamic>> _userStats;
+
+  @override
+  void initState() {
+    super.initState();
+    _userStats = fetchUserStats();
+  }
+
+  Future<Map<String, dynamic>> fetchUserStats() async {
+    print('Starte API Call...');  // Debug-Ausgabe
+
+    final response = await http.get(
+      Uri.parse('$apiBaseUrl/api/user/$userId'),
+    );
+
+    // Gib Statuscode und Antwortbody in der Konsole aus
+    print('Statuscode: ${response.statusCode}');
+    print('Antwort: ${response.body}');
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      return {
+        'xp': data['xp'] ?? 0,
+        'level': data['level'] ?? 0,
+      };
+    } else {
+      throw Exception('Fehler beim Abrufen der User-Daten');
+    }
+  }
+
+
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 34, 21, 53),
       appBar: AppBar(
-        title:  const SectionHeader("Startseite"),
+        title: const SectionHeader("Startseite"),
         backgroundColor: const Color.fromARGB(255, 34, 21, 53),
         foregroundColor: const Color.fromARGB(255, 221, 115, 45),
         elevation: 0,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // 💡 NEU: Box für Level + XP + Fortschrittsanzeige
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white10,
-                borderRadius: BorderRadius.circular(12),
-              ),
+      body: FutureBuilder<Map<String, dynamic>>(
+        future: _userStats,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Fehler: ${snapshot.error}'));
+          } else {
+            final xp = snapshot.data!['xp'] as int;
+            final level = snapshot.data!['level'] as int;
+            final int xpNeeded = 100; // Später dynamisch berechenbar
+            final double progress = (xp / xpNeeded).clamp(0.0, 1.0);
+
+            return Padding(
+              padding: const EdgeInsets.all(16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    "Level  1",
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 40,
-                      color: Color.fromARGB(255, 221, 115, 45),
+                  // 📊 XP & Level Box
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white10,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Level $level",
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 40,
+                            color: Color.fromARGB(255, 221, 115, 45),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        LinearPercentIndicator(
+                          animation: true,
+                          animationDuration: 500,
+                          lineHeight: 50.0,
+                          percent: progress,
+                          backgroundColor: Colors.white24,
+                          progressColor:
+                          const Color.fromARGB(255, 221, 115, 45),
+                          barRadius: const Radius.circular(1000),
+                          center: Text(
+                            "${(progress * 100).round()}%",
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        Text(
+                          "XP: $xp / $xpNeeded",
+                          style: const TextStyle(
+                            fontSize: 20,
+                            color: Color.fromARGB(255, 221, 115, 45),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 10),
-                  LinearPercentIndicator(
-                    animation: true,
-                    animationDuration: 500,
-                    lineHeight: 50.0,
-                    percent: progress.clamp(0.0, 1.0),
-                    backgroundColor: Colors.white24,
-                    progressColor: const Color.fromARGB(255, 221, 115, 45),
-                    barRadius: const Radius.circular(1000),
-                    center: Text(
-                      "${(progress * 100).round()}%",
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    "XP: $xp / $xpNeeded",
-                    style: const TextStyle(
-                      fontSize: 20,
-                      color: Color.fromARGB(255, 221, 115, 45),
-                    ),
-                  ),
-                ],
-              ),
-            ),
 
-            const SizedBox(height: 30),
-            Expanded(
-              child: Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.white10,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      "Heutige Aufgaben:",
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 40,
-                        color: Color.fromARGB(255, 221, 115, 45),
+                  const SizedBox(height: 30),
+
+                  // ✅ Aufgabenliste
+                  Expanded(
+                    child: Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white10,
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                    ),
-                    const SizedBox(height: 10),
-                    Expanded(
-                      child: ListView(
-                        children: const [
-                          TaskCard(
-                            title: "Produktbeschreibung-Prompt schreiben",
-                            difficulty: "Leicht",
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            "Heutige Aufgaben:",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 40,
+                              color: Color.fromARGB(255, 221, 115, 45),
+                            ),
                           ),
-                          TaskCard(
-                            title: "KI-Chat mit Stilvorgabe erstellen",
-                            difficulty: "Mittel",
-                          ),
-                          TaskCard(
-                            title: "Argumentatives Streitgespräch prompten",
-                            difficulty: "Schwer",
+                          const SizedBox(height: 10),
+                          Expanded(
+                            child: ListView(
+                              children: const [
+                                TaskCard(
+                                  title: "Produktbeschreibung-Prompt schreiben",
+                                  difficulty: "Leicht",
+                                ),
+                                TaskCard(
+                                  title: "KI-Chat mit Stilvorgabe erstellen",
+                                  difficulty: "Mittel",
+                                ),
+                                TaskCard(
+                                  title: "Argumentatives Streitgespräch prompten",
+                                  difficulty: "Schwer",
+                                ),
+                              ],
+                            ),
                           ),
                         ],
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ),
-          ],
-        ),
+            );
+          }
+        },
       ),
     );
   }
