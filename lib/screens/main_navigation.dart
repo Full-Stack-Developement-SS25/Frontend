@@ -3,9 +3,7 @@ import 'dashboard_screen.dart';
 import 'scoreboard_screen.dart';
 import 'task_list_screen.dart';
 import 'profile_screen.dart';
-
-
-
+import './/utils/app_colors.dart';
 
 class MainNavigation extends StatefulWidget {
   const MainNavigation({super.key});
@@ -29,33 +27,32 @@ class _MainNavigationState extends State<MainNavigation> {
     return Scaffold(
       body: _pages[_currentIndex],
       bottomNavigationBar: Container(
-        color: const Color.fromARGB(255, 34, 21, 53),
+        color: AppColors.primaryBackground,
         child: BottomNavigationBar(
           backgroundColor: Colors.transparent,
           type: BottomNavigationBarType.fixed,
           elevation: 0,
-          showSelectedLabels: false,
-          showUnselectedLabels: false,
-          selectedItemColor: const Color.fromARGB(
-            255,
-            213,
-            111,
-            15,
-          ),
-          unselectedItemColor: Colors.white,
+          selectedItemColor: AppColors.accent,
+          unselectedItemColor: AppColors.textPrimary,
           currentIndex: _currentIndex,
           onTap: (index) => setState(() => _currentIndex = index),
           items: const [
             BottomNavigationBarItem(
-              icon: Icon(Icons.home_rounded,  size: 50),
+              icon: Icon(Icons.home_rounded, size: 50),
               label: "Dashboard",
             ),
-            BottomNavigationBarItem(icon: Icon(Icons.task,  size: 40), label: "Aufgaben"),
             BottomNavigationBarItem(
-              icon: Icon(Icons.leaderboard_rounded,  size: 42),
+              icon: Icon(Icons.task, size: 40),
+              label: "Aufgaben",
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.leaderboard_rounded, size: 42),
               label: "Scoreboard",
             ),
-            BottomNavigationBarItem(icon: Icon(Icons.person,  size: 50), label: "Profil"),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.person, size: 50),
+              label: "Profil",
+            ),
           ],
         ),
       ),

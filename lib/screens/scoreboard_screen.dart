@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../widgets/section_header.dart';
 
+import './/utils/app_colors.dart';
 
 class ScoreboardScreen extends StatelessWidget {
   const ScoreboardScreen({super.key});
@@ -16,22 +17,22 @@ class ScoreboardScreen extends StatelessWidget {
     ];
 
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 34, 21, 53),
+      backgroundColor: AppColors.primaryBackground,
       appBar: AppBar(
-        title: const SectionHeader("Scoreboard"),
-        backgroundColor: const Color.fromARGB(255, 34, 21, 53),
-        foregroundColor: const Color.fromARGB(255, 221, 115, 45),
+        title: const Text("Scoreboard"),
+        backgroundColor: AppColors.primaryBackground,
+        foregroundColor: AppColors.accent,
         elevation: 0,
       ),
       body: ListView.separated(
         padding: const EdgeInsets.all(16),
         itemCount: scores.length,
-        separatorBuilder: (_, __) => const Divider(color: Colors.white24),
+        separatorBuilder: (_, __) => Divider(color: AppColors.divider),
         itemBuilder: (context, index) {
           final user = scores[index];
           return ListTile(
             leading: CircleAvatar(
-              backgroundColor: const Color.fromARGB(255, 221, 115, 45),
+              backgroundColor: AppColors.accent,
               child: Text(
                 "${index + 1}",
                 style: const TextStyle(color: Colors.white),

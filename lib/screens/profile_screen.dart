@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import '../widgets/section_header.dart';
 
+import 'package:prompt_master/services/auth_service.dart';
+import './/utils/app_colors.dart';
+import 'login_screen.dart'; // Importiere die Login-Seite
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -15,11 +18,11 @@ class ProfileScreen extends StatelessWidget {
     final int badges = 1;
 
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 34, 21, 53),
+      backgroundColor: AppColors.primaryBackground,
       appBar: AppBar(
-        title: const SectionHeader("Profil"),
-        backgroundColor: const Color.fromARGB(255, 34, 21, 53),
-        foregroundColor: const Color.fromARGB(255, 221, 115, 45),
+        title: const Text("Profil"),
+        backgroundColor: AppColors.primaryBackground,
+        foregroundColor: AppColors.accent,
         elevation: 0,
       ),
       body: Padding(
@@ -29,10 +32,14 @@ class ProfileScreen extends StatelessWidget {
           children: [
             Row(
               children: [
-                const CircleAvatar(
+                CircleAvatar(
                   radius: 30,
-                  backgroundColor: Color.fromARGB(255, 221, 115, 45),
-                  child: Icon(Icons.person, size: 30, color: Colors.white),
+                  backgroundColor: AppColors.accent,
+                  child: const Icon(
+                    Icons.person,
+                    size: 30,
+                    color: Colors.white,
+                  ),
                 ),
                 const SizedBox(width: 16),
                 Text(
@@ -54,7 +61,20 @@ class ProfileScreen extends StatelessWidget {
               icon: const Icon(Icons.upgrade),
               label: const Text("Upgrade auf Pro"),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color.fromARGB(255, 221, 115, 45),
+                backgroundColor: AppColors.accent,
+                foregroundColor: Colors.white,
+              ),
+            ),
+            const SizedBox(height: 30),
+            ElevatedButton.icon(
+              onPressed: () {
+                // TODO: Backend-Logout-Logik
+                _logout(context); // Zum Login-Screen navigieren
+              },
+              icon: const Icon(Icons.exit_to_app),
+              label: const Text("Logout"),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.accent,
                 foregroundColor: Colors.white,
               ),
             ),
@@ -75,6 +95,16 @@ class ProfileScreen extends StatelessWidget {
           Text(value, style: const TextStyle(color: Colors.white)),
         ],
       ),
+    );
+  }
+
+  // Logout-Logik: Benutzer ausloggen und zurück zur Login-Seite
+  void _logout(BuildContext context) {
+    AuthService.logout();
+    // Nach dem Logout zurück zur Login-Seite
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => const LoginScreen()),
     );
   }
 }

@@ -15,6 +15,10 @@ dependencies:
   percent_indicator: ^4.2.2
   mobile_scanner: ^3.5.2
 
+  email_validator: ^2.0.1
+  http: ^1.4.0
+  logging: ^1.2.0
+  localstorage: ^6.0.0
 
 dev_dependencies:
   flutter_test:

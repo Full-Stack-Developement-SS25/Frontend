@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../widgets/section_header.dart';
 import '../widgets/inline_title.dart';
-
+import './/utils/app_colors.dart';
 
 class TaskScreen extends StatefulWidget {
   final String title;
@@ -19,12 +19,12 @@ class _TaskScreenState extends State<TaskScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 34, 21, 53),
+      backgroundColor: AppColors.primaryBackground,
       appBar: AppBar(
         title: SectionHeader(widget.difficulty),
         automaticallyImplyLeading: false,
-        backgroundColor: const Color.fromARGB(255, 34, 21, 53),
-        foregroundColor: const Color.fromARGB(255, 221, 115, 45),
+        backgroundColor: AppColors.primaryBackground,
+        foregroundColor: AppColors.accent,
         elevation: 0,
       ),
       body: Padding(

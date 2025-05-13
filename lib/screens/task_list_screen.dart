@@ -3,6 +3,8 @@ import '../widgets/task_card.dart';
 import 'choose_join_method_screen.dart';
 import '../widgets/section_header.dart';
 
+import 'task_screen.dart'; // für Detailnavigation
+import './/utils/app_colors.dart'; // Achte darauf, den richtigen Pfad zu verwenden
 
 class TaskListScreen extends StatelessWidget {
   const TaskListScreen({super.key});
@@ -12,11 +14,14 @@ class TaskListScreen extends StatelessWidget {
     final List<Map<String, String>> tasks = [
       {"title": "Produktbeschreibung-Prompt schreiben", "difficulty": "Leicht"},
       {"title": "KI-Chat mit Stilvorgabe erstellen", "difficulty": "Mittel"},
-      {"title": "Argumentatives Streitgespräch prompten", "difficulty": "Schwer"},
+      {
+        "title": "Argumentatives Streitgespräch prompten",
+        "difficulty": "Schwer",
+      },
     ];
 
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 34, 21, 53),
+      backgroundColor: AppColors.primaryBackground,
       appBar: AppBar(
         title: const SectionHeader("Aufgaben"),
         backgroundColor: const Color.fromARGB(255, 34, 21, 53),
@@ -60,7 +65,9 @@ class TaskListScreen extends StatelessWidget {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) => const ChooseJoinMethodScreen()),
+                    MaterialPageRoute(
+                      builder: (_) => const ChooseJoinMethodScreen(),
+                    ),
                   );
                 },
               ),

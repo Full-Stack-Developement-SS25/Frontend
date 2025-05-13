@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 import 'task_screen.dart';
-import '../widgets/task_card.dart';
-import '../widgets/section_header.dart';
-
-
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -16,9 +12,9 @@ class DashboardScreen extends StatelessWidget {
     final double progress = xp / xpNeeded;
 
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 34, 21, 53),
+      backgroundColor: AppColors.primaryBackground,
       appBar: AppBar(
-        title:  const SectionHeader("Startseite"),
+        title: const Text("Dashboard"),
         backgroundColor: const Color.fromARGB(255, 34, 21, 53),
         foregroundColor: const Color.fromARGB(255, 221, 115, 45),
         elevation: 0,
