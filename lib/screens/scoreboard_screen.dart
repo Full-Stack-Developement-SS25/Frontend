@@ -1,12 +1,9 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import '../config.dart';
+import 'package:prompt_master/services/user_service.dart';
+import 'package:prompt_master/utils/app_colors.dart';
 import '../widgets/section_header.dart';
 
-import './/utils/app_colors.dart';
-
-class ScoreboardScreen extends StatelessWidget {
+class ScoreboardScreen extends StatefulWidget {
   const ScoreboardScreen({super.key});
 
   @override
@@ -19,25 +16,7 @@ class _ScoreboardScreenState extends State<ScoreboardScreen> {
   @override
   void initState() {
     super.initState();
-    _scoreboard = fetchScoreboard();
-  }
-
-  Future<List<Map<String, dynamic>>> fetchScoreboard() async {
-    final response = await http.get(Uri.parse('$apiBaseUrl/api/user'));
-
-    if (response.statusCode == 200) {
-      final List<dynamic> data = json.decode(response.body);
-      return data.map((user) {
-        return {
-          'id': user['id'],
-          'username': user['username'], // 👈 NEU
-          'level': user['level'],
-          'xp': user['xp'],
-        };
-      }).toList();
-    } else {
-      throw Exception('Fehler beim Abrufen der Benutzer');
-    }
+    _scoreboard = UserService.fetchScoreboard();
   }
 
   @override
@@ -46,8 +25,8 @@ class _ScoreboardScreenState extends State<ScoreboardScreen> {
       backgroundColor: AppColors.primaryBackground,
       appBar: AppBar(
         title: const SectionHeader("Leaderboard"),
-        backgroundColor: const Color.fromARGB(255, 34, 21, 53),
-        foregroundColor: const Color.fromARGB(255, 221, 115, 45),
+        backgroundColor: AppColors.primaryBackground,
+        foregroundColor: AppColors.accent,
         elevation: 0,
       ),
       body: FutureBuilder<List<Map<String, dynamic>>>(

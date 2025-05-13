@@ -1,11 +1,12 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:percent_indicator/percent_indicator.dart';
-import 'task_screen.dart';
+import 'package:prompt_master/services/user_service.dart';
+import 'package:prompt_master/utils/app_colors.dart';
 import '../widgets/task_card.dart';
 import '../widgets/section_header.dart';
-import './/utils/app_colors.dart';
+
+// Temporär: später dynamisch laden z. B. aus SharedPreferences
+const String userId = 'deine-user-id-hier';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -20,23 +21,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   void initState() {
     super.initState();
-    _userStats = fetchUserStats();
-  }
-
-  Future<Map<String, dynamic>> fetchUserStats() async {
-    print('Starte API Call...'); // Debug-Ausgabe
-
-    final response = await http.get(Uri.parse('$apiBaseUrl/api/user/$userId'));
-
-    print('Statuscode: ${response.statusCode}');
-    print('Antwort: ${response.body}');
-
-    if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      return {'xp': data['xp'] ?? 0, 'level': data['level'] ?? 0};
-    } else {
-      throw Exception('Fehler beim Abrufen der User-Daten');
-    }
+    _userStats = UserService.fetchUserStats(userId);
   }
 
   @override
@@ -45,8 +30,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
       backgroundColor: AppColors.primaryBackground,
       appBar: AppBar(
         title: const SectionHeader("Startseite"),
-        backgroundColor: const Color.fromARGB(255, 34, 21, 53),
-        foregroundColor: const Color.fromARGB(255, 221, 115, 45),
+        backgroundColor: AppColors.primaryBackground,
+        foregroundColor: AppColors.accent,
         elevation: 0,
       ),
       body: FutureBuilder<Map<String, dynamic>>(
@@ -59,7 +44,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           } else {
             final xp = snapshot.data!['xp'] as int;
             final level = snapshot.data!['level'] as int;
-            final int xpNeeded = 100; // Später dynamisch berechenbar
+            final int xpNeeded = 100; // später dynamisch berechenbar
             final double progress = (xp / xpNeeded).clamp(0.0, 1.0);
 
             return Padding(
@@ -82,7 +67,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 40,
-                            color: Color.fromARGB(255, 221, 115, 45),
+                            color: AppColors.accent,
                           ),
                         ),
                         const SizedBox(height: 10),
@@ -92,12 +77,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           lineHeight: 50.0,
                           percent: progress,
                           backgroundColor: Colors.white24,
-                          progressColor: const Color.fromARGB(
-                            255,
-                            221,
-                            115,
-                            45,
-                          ),
+                          progressColor: AppColors.accent,
                           barRadius: const Radius.circular(1000),
                           center: Text(
                             "${(progress * 100).round()}%",
@@ -112,7 +92,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           "XP: $xp / $xpNeeded",
                           style: const TextStyle(
                             fontSize: 20,
-                            color: Color.fromARGB(255, 221, 115, 45),
+                            color: AppColors.accent,
                           ),
                         ),
                       ],
@@ -137,13 +117,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 40,
-                              color: Color.fromARGB(255, 221, 115, 45),
+                              color: AppColors.accent,
                             ),
                           ),
                           const SizedBox(height: 10),
                           Expanded(
                             child: ListView(
-                              children: const [
+                              children: [
                                 TaskCard(
                                   title: "Produktbeschreibung-Prompt schreiben",
                                   difficulty: "Leicht",
@@ -153,8 +133,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                   difficulty: "Mittel",
                                 ),
                                 TaskCard(
-                                  title:
-                                      "Argumentatives Streitgespräch prompten",
+                                  title: "Argumentatives Streitgespräch prompten",
                                   difficulty: "Schwer",
                                 ),
                               ],
