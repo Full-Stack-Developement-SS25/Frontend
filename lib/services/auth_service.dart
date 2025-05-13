@@ -1,7 +1,7 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'dart:html'; // Nur für Flutter Web
 import 'package:logging/logging.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'config.dart';
 
 class AuthService {
@@ -24,7 +24,8 @@ class AuthService {
       if (response.statusCode == 200) {
         final token = body['token'];
         if (token != null) {
-          window.localStorage['jwt_token'] = token;
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString('jwt_token', token);
           _log.info('JWT-Token erfolgreich gespeichert.');
         } else {
           _log.warning('Token nicht in der Antwort enthalten.');
@@ -43,10 +44,10 @@ class AuthService {
 
   /// Registrierungsmethode: sendet Registrierungs-Request
   static Future<http.Response> register(
-    String email,
-    String password,
-    String username,
-  ) async {
+      String email,
+      String password,
+      String username,
+      ) async {
     final url = Uri.parse('$_baseUrl/auth/register');
 
     try {
@@ -77,8 +78,9 @@ class AuthService {
     }
   }
 
+  /// Nutzerprofil abrufen
   static Future<Map<String, dynamic>> fetchUserProfile() async {
-    final token = getToken();
+    final token = await getToken();
     if (token == null) {
       throw Exception('Kein Token vorhanden. Benutzer nicht eingeloggt.');
     }
@@ -99,18 +101,21 @@ class AuthService {
   }
 
   /// Token abrufen
-  static String? getToken() {
-    return window.localStorage['jwt_token'];
+  static Future<String?> getToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('jwt_token');
   }
 
   /// Token löschen und Logout durchführen
-  static void logout() {
-    window.localStorage.remove('jwt_token');
+  static Future<void> logout() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('jwt_token');
     _log.info('JWT-Token gelöscht. Benutzer abgemeldet.');
   }
 
   /// Prüfen, ob Benutzer eingeloggt ist
-  static bool isLoggedIn() {
-    return getToken() != null;
+  static Future<bool> isLoggedIn() async {
+    final token = await getToken();
+    return token != null;
   }
 }
