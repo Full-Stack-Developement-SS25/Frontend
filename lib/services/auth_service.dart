@@ -1,5 +1,5 @@
-import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'package:logging/logging.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'config.dart';
@@ -8,7 +8,7 @@ class AuthService {
   static final Logger _log = Logger('AuthService');
   static final String _baseUrl = Config.baseUrl;
 
-  /// Login-Methode: sendet Login-Request, speichert JWT-Token bei Erfolg
+  /// Login-Methode: sendet Login-Request, speichert JWT-Token & user_id bei Erfolg
   static Future<http.Response> login(String email, String password) async {
     final url = Uri.parse('$_baseUrl/auth/login');
 
@@ -23,12 +23,28 @@ class AuthService {
 
       if (response.statusCode == 200) {
         final token = body['token'];
+
         if (token != null) {
           final prefs = await SharedPreferences.getInstance();
           await prefs.setString('jwt_token', token);
-          _log.info('JWT-Token erfolgreich gespeichert.');
+          _log.info('✅ JWT-Token gespeichert.');
+
+          // ⬇ Jetzt: User-Profil abrufen, um user_id zu speichern
+          try {
+            final userProfile = await fetchUserProfile();
+            final userId = userProfile['user']?['id'];
+
+            if (userId != null) {
+              await prefs.setString('user_id', userId);
+              _log.info('✅ user_id gespeichert: $userId');
+            } else {
+              _log.warning('⚠️ user_id fehlt im Profil.');
+            }
+          } catch (e) {
+            _log.warning('⚠️ Fehler beim Abrufen des Profils: $e');
+          }
         } else {
-          _log.warning('Token nicht in der Antwort enthalten.');
+          _log.warning('⚠️ Token fehlt in Login-Antwort.');
         }
       } else {
         final errorMsg = body['error'] ?? 'Unbekannter Fehler beim Login';
@@ -37,17 +53,17 @@ class AuthService {
 
       return response;
     } catch (e) {
-      _log.severe('Login fehlgeschlagen: $e');
+      _log.severe('❌ Login fehlgeschlagen: $e');
       rethrow;
     }
   }
 
   /// Registrierungsmethode: sendet Registrierungs-Request
   static Future<http.Response> register(
-      String email,
-      String password,
-      String username,
-      ) async {
+    String email,
+    String password,
+    String username,
+  ) async {
     final url = Uri.parse('$_baseUrl/auth/register');
 
     try {
@@ -64,7 +80,7 @@ class AuthService {
       );
 
       if (response.statusCode == 200) {
-        _log.info('Registrierung erfolgreich für $email.');
+        _log.info('✅ Registrierung erfolgreich für $email.');
       } else {
         final body = json.decode(response.body);
         final errorMsg = body['error'] ?? 'Registrierung fehlgeschlagen';
@@ -73,7 +89,7 @@ class AuthService {
 
       return response;
     } catch (e) {
-      _log.severe('Fehler bei der Registrierung: $e');
+      _log.severe('❌ Fehler bei der Registrierung: $e');
       rethrow;
     }
   }
@@ -106,16 +122,23 @@ class AuthService {
     return prefs.getString('jwt_token');
   }
 
-  /// Token löschen und Logout durchführen
+  /// Token & user_id löschen → Logout
   static Future<void> logout() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('jwt_token');
-    _log.info('JWT-Token gelöscht. Benutzer abgemeldet.');
+    await prefs.remove('user_id');
+    _log.info('✅ Benutzer abgemeldet, Daten gelöscht.');
   }
 
   /// Prüfen, ob Benutzer eingeloggt ist
   static Future<bool> isLoggedIn() async {
     final token = await getToken();
     return token != null;
+  }
+
+  /// Optional: user_id direkt abrufen
+  static Future<String?> getUserId() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('user_id');
   }
 }
