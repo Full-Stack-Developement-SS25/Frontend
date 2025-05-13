@@ -34,6 +34,14 @@ class AuthService {
             final userProfile = await fetchUserProfile();
             final userId = userProfile['user']?['id'];
 
+            final username = userProfile['user']?['username'];
+            if (username != null) {
+              await prefs.setString('username', username);
+              _log.info('✅ username gespeichert: $username');
+            } else {
+              _log.warning('⚠️ username fehlt im Profil.');
+            }
+
             if (userId != null) {
               await prefs.setString('user_id', userId);
               _log.info('✅ user_id gespeichert: $userId');

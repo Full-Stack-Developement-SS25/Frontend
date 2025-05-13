@@ -1,8 +1,10 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'config.dart';
 
 class UserService {
+  /// Holt XP + Level für ein bestimmtes User-ID (wird z. B. vom Dashboard genutzt)
   static Future<Map<String, dynamic>> fetchUserStats(String userId) async {
     final url = Uri.parse('${Config.baseUrl}/user/$userId');
 
@@ -16,6 +18,7 @@ class UserService {
     }
   }
 
+  /// Holt die Topliste aller Nutzer:innen
   static Future<List<Map<String, dynamic>>> fetchScoreboard() async {
     final url = Uri.parse('${Config.baseUrl}/user');
 
@@ -33,6 +36,52 @@ class UserService {
       }).toList();
     } else {
       throw Exception('Fehler beim Abrufen des Scoreboards: ${response.body}');
+    }
+  }
+
+  /// Holt immer aktuelle Daten des eingeloggten Nutzers (für Profilseite)
+  static Future<Map<String, dynamic>> getFreshUserStats() async {
+    final prefs = await SharedPreferences.getInstance();
+    final userId = prefs.getString('user_id');
+
+    if (userId == null) {
+      throw Exception("❌ Kein user_id in SharedPreferences gefunden.");
+    }
+
+    final url = Uri.parse('${Config.baseUrl}/user/$userId');
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      return {
+        'username': data['username'] ?? prefs.getString('username'),
+        'xp': data['xp'] ?? 0,
+        'level': data['level'] ?? 0,
+      };
+    } else {
+      throw Exception(
+        'Fehler beim Abrufen des Live-User-Stats: ${response.body}',
+      );
+    }
+  }
+
+  static Future<List<String>> fetchUserBadges() async {
+    final prefs = await SharedPreferences.getInstance();
+    final userId = prefs.getString('user_id');
+
+    if (userId == null) {
+      throw Exception("❌ Kein user_id gefunden.");
+    }
+
+    final response = await http.get(
+      Uri.parse('${Config.baseUrl}/badges/$userId'),
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      return List<String>.from(data['badges']);
+    } else {
+      throw Exception('Fehler beim Abrufen der Badges: ${response.body}');
     }
   }
 }

@@ -1,110 +1,85 @@
 import 'package:flutter/material.dart';
-import '../widgets/section_header.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../utils/app_colors.dart';
+import '../services/auth_service.dart';
+import '../screens/login_screen.dart';
+import 'profile_tab_content.dart';
+import 'badges_tab_content.dart';
 
-import 'package:prompt_master/services/auth_service.dart';
-import './/utils/app_colors.dart';
-import 'login_screen.dart'; // Importiere die Login-Seite
-
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    // Später: dynamische Daten vom User-Model
-    final String username = "mattis_dev";
-    final int level = 1;
-    final int xp = 30;
-    final int completedTasks = 3;
-    final int badges = 1;
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
 
-    return Scaffold(
-      backgroundColor: AppColors.primaryBackground,
-      appBar: AppBar(
-        title: const Text("Profil"),
-        backgroundColor: AppColors.primaryBackground,
-        foregroundColor: AppColors.accent,
-        elevation: 0,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                CircleAvatar(
-                  radius: 30,
-                  backgroundColor: AppColors.accent,
-                  child: const Icon(
-                    Icons.person,
-                    size: 30,
-                    color: Colors.white,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Text(
-                  username,
-                  style: const TextStyle(fontSize: 20, color: Colors.white),
-                ),
-              ],
-            ),
-            const SizedBox(height: 30),
-            _profileStat("Level", "$level"),
-            _profileStat("XP", "$xp"),
-            _profileStat("Abgeschlossene Aufgaben", "$completedTasks"),
-            _profileStat("Abzeichen", "$badges"),
-            const SizedBox(height: 30),
-            ElevatedButton.icon(
-              onPressed: () {
-                // TODO: Upgrade logik
-              },
-              icon: const Icon(Icons.upgrade),
-              label: const Text("Upgrade auf Pro"),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.accent,
-                foregroundColor: Colors.white,
-              ),
-            ),
-            const SizedBox(height: 30),
-            ElevatedButton.icon(
-              onPressed: () {
-                // TODO: Backend-Logout-Logik
-                _logout(context); // Zum Login-Screen navigieren
-              },
-              icon: const Icon(Icons.exit_to_app),
-              label: const Text("Logout"),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.accent,
-                foregroundColor: Colors.white,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+class _ProfileScreenState extends State<ProfileScreen>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+  String _username = "User";
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUsername();
+    _tabController = TabController(length: 2, vsync: this);
   }
 
-  Widget _profileStat(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(label, style: const TextStyle(color: Colors.white70)),
-          ),
-          Text(value, style: const TextStyle(color: Colors.white)),
-        ],
-      ),
-    );
+  Future<void> _loadUsername() async {
+    final prefs = await SharedPreferences.getInstance();
+    final name = prefs.getString('username');
+    setState(() {
+      _username = name ?? "User";
+    });
   }
 
-  // Logout-Logik: Benutzer ausloggen und zurück zur Login-Seite
-  void _logout(BuildContext context) {
-    AuthService.logout();
-    // Nach dem Logout zurück zur Login-Seite
+  void _logout() async {
+    await AuthService.logout();
+    if (!mounted) return;
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (context) => const LoginScreen()),
+    );
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColors.primaryBackground,
+      appBar: AppBar(
+        title: Text(
+          "Hallo, $_username!",
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 32,
+            color: Color.fromARGB(255, 221, 115, 45),
+          ),
+        ),
+        backgroundColor: AppColors.primaryBackground,
+        foregroundColor: AppColors.accent,
+        elevation: 0,
+        actions: [
+          IconButton(
+            onPressed: _logout,
+            icon: const Icon(Icons.logout),
+            tooltip: 'Logout',
+          ),
+        ],
+        bottom: TabBar(
+          controller: _tabController,
+          tabs: const [Tab(text: "Profil"), Tab(text: "Badges")],
+        ),
+      ),
+      body: TabBarView(
+        controller: _tabController,
+        children: const [ProfileTabContent(), BadgesTabContent()],
+      ),
     );
   }
 }
