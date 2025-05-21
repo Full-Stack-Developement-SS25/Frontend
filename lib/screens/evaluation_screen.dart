@@ -161,27 +161,60 @@ class _EvaluationScreenState extends State<EvaluationScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.pop(context); // zurück zur Eingabe
-                  },
-                  child: const Text('Erneut versuchen'),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.accent,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text(
+                      'Erneut versuchen',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.white,
+                      ),
+                    ),
+                  ),
                 ),
-                ElevatedButton(
-                  onPressed: () async {
-                    try {
-                      await TaskService.markAsDone(widget.taskId);
-                      Navigator.popUntil(
-                        context,
-                        ModalRoute.withName('/taskList'),
-                      );
-                    } catch (e) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Fehler beim Markieren: $e')),
-                      );
-                    }
-                  },
-                  child: const Text('Als erledigt markieren'),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      try {
+                        await TaskService.markAsDone(widget.taskId);
+                        Navigator.pushNamedAndRemoveUntil(
+                          context,
+                          '/taskList',
+                          (route) => false,
+                        );
+
+                      } catch (e) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Fehler beim Markieren: $e')),
+                        );
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.accent,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text(
+                      'Als erledigt markieren',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.white,
+                      ),
+                    ),
+                  ),
                 ),
               ],
             ),

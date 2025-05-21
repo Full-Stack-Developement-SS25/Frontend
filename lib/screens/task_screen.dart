@@ -3,7 +3,6 @@ import 'package:prompt_master/utils/app_colors.dart';
 import '../widgets/section_header.dart';
 import '../widgets/inline_title.dart';
 import '../services/ai_service.dart';
-import '../services/task_service.dart';
 import 'evaluation_screen.dart';
 
 class TaskScreen extends StatefulWidget {
@@ -26,6 +25,7 @@ class TaskScreen extends StatefulWidget {
 
 class _TaskScreenState extends State<TaskScreen> {
   final TextEditingController _controller = TextEditingController();
+  bool isLoading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -93,41 +93,53 @@ class _TaskScreenState extends State<TaskScreen> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () async {
-                  final prompt = _controller.text.trim();
-                  if (prompt.isNotEmpty) {
-                    final result = await AIService.evaluatePrompt(
-                      widget.taskText,
-                      prompt,
-                      widget.taskId,
-                    );
+                onPressed:
+                    isLoading
+                        ? null
+                        : () async {
+                          final prompt = _controller.text.trim();
+                          if (prompt.isNotEmpty) {
+                            setState(() {
+                              isLoading = true;
+                            });
 
-                    if (result != null && result['stars'] != null) {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder:
-                              (_) => EvaluationScreen(
-                                score: result['stars'],
-                                explanation: result['explanation'] ?? '',
-                                taskText: widget.taskText,
-                                userPrompt: prompt,
-                                bestPractices: result['bestPractices'],
-                                improvementSuggestions:
-                                    result['improvementSuggestions'],
-                                taskId: widget.taskId,
-                              ),
-                        ),
-                      );
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text("Fehler bei der Bewertung"),
-                        ),
-                      );
-                    }
-                  }
-                },
+                            final result = await AIService.evaluatePrompt(
+                              widget.taskText,
+                              prompt,
+                              widget.taskId,
+                            );
+
+                            setState(() {
+                              isLoading = false;
+                            });
+
+                            if (result != null && result['stars'] != null) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder:
+                                      (_) => EvaluationScreen(
+                                        score: result['stars'],
+                                        explanation:
+                                            result['explanation'] ?? '',
+                                        taskText: widget.taskText,
+                                        userPrompt: prompt,
+                                        bestPractices: result['bestPractices'],
+                                        improvementSuggestions:
+                                            result['improvementSuggestions'],
+                                        taskId: widget.taskId,
+                                      ),
+                                ),
+                              );
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text("Fehler bei der Bewertung"),
+                                ),
+                              );
+                            }
+                          }
+                        },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.accent,
                   padding: const EdgeInsets.symmetric(vertical: 16),
@@ -135,14 +147,24 @@ class _TaskScreenState extends State<TaskScreen> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: const Text(
-                  "Senden",
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.white,
-                  ),
-                ),
+                child:
+                    isLoading
+                        ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            color: AppColors.white,
+                            strokeWidth: 2.5,
+                          ),
+                        )
+                        : const Text(
+                          "Senden",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.white,
+                          ),
+                        ),
               ),
             ),
           ],
