@@ -3,7 +3,12 @@ plugins {
     id("kotlin-android")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
+    // Android Gradle Plugin (ohne apply, weil in App angewendet)
+
+    // Google Services Plugin (apply false, wird in App-Level angewendet)
+    id("com.google.gms.google-services") version "4.4.2" apply false
 }
+
 
 android {
     namespace = "com.example.prompt_master"
@@ -41,4 +46,21 @@ android {
 
 flutter {
     source = "../.."
+}
+
+repositories {
+    google()
+    mavenCentral()
+}
+
+dependencies {
+    // Firebase BoM (verwaltet kompatible Versionen automatisch)
+    implementation(platform("com.google.firebase:firebase-bom:33.13.0"))
+
+    // Beispiel: Firebase Analytics
+    implementation("com.google.firebase:firebase-analytics")
+
+    // Weitere Firebase-Module bei Bedarf:
+    // implementation("com.google.firebase:firebase-auth")
+    // implementation("com.google.firebase:firebase-firestore")
 }

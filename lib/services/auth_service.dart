@@ -1,4 +1,7 @@
 import 'dart:convert';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:logging/logging.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -140,5 +143,72 @@ class AuthService {
   static Future<String?> getUserId() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString('user_id');
+  }
+
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final GoogleSignIn _googleSignIn = GoogleSignIn(
+    clientId:
+        kIsWeb
+            ? '815351996637-7726jkhsk9ib1n2f1frgn2i3ejvmfmq4.apps.googleusercontent.com'
+            : null,
+  );
+
+  Future<void> signInWithGoogle() async {
+    try {
+      // Google Sign-In starten
+      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+      if (googleUser == null) {
+        _log.info('Google Sign-In abgebrochen');
+        return;
+      }
+
+      // Authentifizierungsdetails holen
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
+
+      // Firebase Credential erstellen
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      // Firebase Login mit Credential
+      UserCredential userCredential = await _auth.signInWithCredential(
+        credential,
+      );
+
+      // Firebase ID Token holen
+      String? firebaseIdToken = await userCredential.user?.getIdToken();
+
+      if (firebaseIdToken == null) {
+        throw Exception("Kein Firebase ID Token erhalten.");
+      }
+
+      _log.info('Firebase ID Token erhalten: $firebaseIdToken');
+
+      // Backend mit Firebase Token anfragen (zur eigenen JWT-Erstellung)
+      final response = await http.post(
+        Uri.parse('$_baseUrl/auth/firebase-login'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({'token': firebaseIdToken}),
+      );
+
+      print('Statuscode: ${response.statusCode}');
+      print('Body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final body = json.decode(response.body);
+        final backendToken = body['token'];
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('jwt_token', backendToken);
+        _log.info('✅ Backend JWT-Token gespeichert.');
+      } else {
+        final body = json.decode(response.body);
+        throw Exception('Backend Login Fehler: ${body['message']}');
+      }
+    } catch (e) {
+      _log.severe('Fehler bei Google Sign-In: $e');
+      rethrow;
+    }
   }
 }

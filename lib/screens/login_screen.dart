@@ -15,8 +15,7 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  final TextEditingController usernameController =
-      TextEditingController(); // NEU
+  final TextEditingController usernameController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   bool isPasswordVisible = false;
@@ -30,7 +29,7 @@ class _LoginScreenState extends State<LoginScreen> {
     return password.length >= 6;
   }
 
-  void handleSubmit() async {
+  Future<void> handleSubmit() async {
     final email = emailController.text.trim();
     final password = passwordController.text.trim();
     final username = usernameController.text.trim();
@@ -41,7 +40,7 @@ class _LoginScreenState extends State<LoginScreen> {
       final response =
           isLoginMode
               ? await AuthService.login(email, password)
-              : await AuthService.register(email, password, username); // NEU
+              : await AuthService.register(email, password, username);
 
       if (response.statusCode == 200) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -53,10 +52,15 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           ),
         );
+
         _navigateToDashboard(context);
       } else {
+        // Fehler aus Backend lesen (hier 'error' oder 'message' prüfen)
+        final responseBody = jsonDecode(response.body);
         final errorMsg =
-            jsonDecode(response.body)['message'] ?? "Unbekannter Fehler";
+            responseBody['error'] ??
+            responseBody['message'] ??
+            "Unbekannter Fehler";
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text("Fehler: $errorMsg")));
@@ -76,13 +80,16 @@ class _LoginScreenState extends State<LoginScreen> {
     final email = emailController.text.trim();
     if (!isEmailValid(email)) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Bitte eine gültige E-Mail-Adresse eingeben!")),
+        const SnackBar(
+          content: Text("Bitte eine gültige E-Mail-Adresse eingeben!"),
+        ),
       );
       return;
     }
 
+    // Hier könntest du noch eine Funktion im AuthService aufrufen für Passwort zurücksetzen
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
+      const SnackBar(
         content: Text(
           "Ein Link zum Zurücksetzen des Passworts wurde an Ihre E-Mail gesendet.",
         ),
@@ -133,7 +140,18 @@ class _LoginScreenState extends State<LoginScreen> {
                     'Mit Google anmelden',
                     style: TextStyle(fontSize: 16),
                   ),
-                  onPressed: () => _navigateToDashboard(context),
+                  onPressed: () async {
+                    try {
+                      await AuthService().signInWithGoogle();
+                      _navigateToDashboard(context);
+                    } catch (e) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Google Anmeldung fehlgeschlagen: $e'),
+                        ),
+                      );
+                    }
+                  },
                 ),
                 const SizedBox(height: 20),
                 ElevatedButton.icon(
