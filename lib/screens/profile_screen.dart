@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../widgets/section_header.dart';
 
 import 'package:prompt_master/services/auth_service.dart';
 import './/utils/app_colors.dart';

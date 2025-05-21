@@ -41,20 +41,26 @@ class TaskCard extends StatelessWidget {
       margin: const EdgeInsets.symmetric(vertical: 8),
       elevation: 4,
       child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 12,
+        ),
         leading: Icon(
           _getDifficultyIcon(),
           color: _getDifficultyColor(),
           size: 32,
         ),
         title: Text(
-          "$difficulty",
-          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white, ),
-
+          difficulty,
+          style: const TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
         ),
         subtitle: Text(
-            title,
-            style: const TextStyle(color: Colors.white),
+          title,
+          style: const TextStyle(color: Colors.white),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
@@ -63,8 +69,8 @@ class TaskCard extends StatelessWidget {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) =>
-                  TaskScreen(title: title, difficulty: difficulty),
+              builder:
+                  (context) => TaskScreen(title: title, difficulty: difficulty),
             ),
           );
         },
