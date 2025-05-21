@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:prompt_master/services/user_service.dart';
+import 'package:prompt_master/services/task_service.dart';
 import 'package:prompt_master/utils/app_colors.dart';
 import '../widgets/task_card.dart';
 import '../widgets/section_header.dart';
+import 'task_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -15,23 +17,23 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   Future<Map<String, dynamic>>? _userStats;
+  Future<List<Map<String, dynamic>>>? _tasksFuture;
 
   @override
   void initState() {
     super.initState();
-    _loadUserStats();
+    _initData();
   }
 
-  Future<void> _loadUserStats() async {
+  Future<void> _initData() async {
     final prefs = await SharedPreferences.getInstance();
     final userId = prefs.getString('user_id');
 
     if (userId != null) {
       setState(() {
         _userStats = UserService.fetchUserStats(userId);
+        _tasksFuture = TaskService.fetchTasks(userId);
       });
-    } else {
-      // Optional: Weiterleitung zum Login oder Fehleranzeige
     }
   }
 
@@ -46,7 +48,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         elevation: 0,
       ),
       body:
-          _userStats == null
+          _userStats == null || _tasksFuture == null
               ? const Center(child: CircularProgressIndicator())
               : FutureBuilder<Map<String, dynamic>>(
                 future: _userStats,
@@ -58,7 +60,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   } else {
                     final xp = snapshot.data!['xp'] as int;
                     final level = snapshot.data!['level'] as int;
-                    final int xpNeeded = 100; // später dynamisch berechenbar
+                    const int xpNeeded = 100;
                     final double progress = (xp / xpNeeded).clamp(0.0, 1.0);
 
                     return Padding(
@@ -66,7 +68,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // 📊 XP & Level Box
                           Container(
                             padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
@@ -112,52 +113,76 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               ],
                             ),
                           ),
-
                           const SizedBox(height: 30),
-
-                          // ✅ Aufgabenliste
+                          const Text(
+                            "Heutige Aufgaben:",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 40,
+                              color: AppColors.accent,
+                            ),
+                          ),
+                          const SizedBox(height: 10),
                           Expanded(
-                            child: Container(
-                              padding: const EdgeInsets.all(16),
-                              decoration: BoxDecoration(
-                                color: Colors.white10,
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text(
-                                    "Heutige Aufgaben:",
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 40,
+                            child: FutureBuilder<List<Map<String, dynamic>>>(
+                              future: _tasksFuture,
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState ==
+                                    ConnectionState.waiting) {
+                                  return const Center(
+                                    child: CircularProgressIndicator(
                                       color: AppColors.accent,
                                     ),
-                                  ),
-                                  const SizedBox(height: 10),
-                                  Expanded(
-                                    child: ListView(
-                                      children: [
-                                        TaskCard(
-                                          title:
-                                              "Produktbeschreibung-Prompt schreiben",
-                                          difficulty: "Leicht",
-                                        ),
-                                        TaskCard(
-                                          title:
-                                              "KI-Chat mit Stilvorgabe erstellen",
-                                          difficulty: "Mittel",
-                                        ),
-                                        TaskCard(
-                                          title:
-                                              "Argumentatives Streitgespräch prompten",
-                                          difficulty: "Schwer",
-                                        ),
-                                      ],
+                                  );
+                                } else if (snapshot.hasError) {
+                                  return const Center(
+                                    child: Text(
+                                      "Fehler beim Laden der Aufgaben",
+                                      style: TextStyle(
+                                        color: AppColors.textSecondary,
+                                      ),
                                     ),
-                                  ),
-                                ],
-                              ),
+                                  );
+                                } else if (!snapshot.hasData ||
+                                    snapshot.data!.isEmpty) {
+                                  return const Center(
+                                    child: Text(
+                                      "Keine Aufgaben gefunden",
+                                      style: TextStyle(
+                                        color: AppColors.textSecondary,
+                                      ),
+                                    ),
+                                  );
+                                }
+
+                                final tasks = snapshot.data!.take(3).toList();
+                                return ListView.builder(
+                                  itemCount: tasks.length,
+                                  itemBuilder: (context, index) {
+                                    final task = tasks[index];
+                                    return TaskCard(
+                                      title: task['title'],
+                                      difficulty: task['difficulty'].toString(),
+                                      onTap: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder:
+                                                (_) => TaskScreen(
+                                                  taskId: task['id'],
+                                                  title: task['title'],
+                                                  difficulty:
+                                                      task['difficulty']
+                                                          .toString(),
+                                                  taskText: task['description'],
+                                                ),
+                                          ),
+                                        );
+                                      },
+                                    );
+                                  },
+                                );
+                              },
                             ),
                           ),
                         ],

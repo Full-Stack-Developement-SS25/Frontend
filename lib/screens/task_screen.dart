@@ -3,14 +3,18 @@ import 'package:prompt_master/utils/app_colors.dart';
 import '../widgets/section_header.dart';
 import '../widgets/inline_title.dart';
 import '../services/ai_service.dart';
+import '../services/task_service.dart';
+import 'evaluation_screen.dart';
 
 class TaskScreen extends StatefulWidget {
+  final String taskId;
   final String title;
   final String difficulty;
   final String taskText;
 
   const TaskScreen({
     super.key,
+    required this.taskId,
     required this.title,
     required this.difficulty,
     required this.taskText,
@@ -92,29 +96,33 @@ class _TaskScreenState extends State<TaskScreen> {
                 onPressed: () async {
                   final prompt = _controller.text.trim();
                   if (prompt.isNotEmpty) {
-                    final feedback = await AIService.evaluatePrompt(
+                    final result = await AIService.evaluatePrompt(
                       widget.taskText,
                       prompt,
+                      widget.taskId,
                     );
-                    if (feedback != null) {
-                      showDialog(
-                        context: context,
-                        builder:
-                            (context) => AlertDialog(
-                              title: const Text("KI-Bewertung"),
-                              content: Text(feedback),
-                              actions: [
-                                TextButton(
-                                  child: const Text("OK"),
-                                  onPressed: () => Navigator.of(context).pop(),
-                                ),
-                              ],
-                            ),
+
+                    if (result != null && result['stars'] != null) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder:
+                              (_) => EvaluationScreen(
+                                score: result['stars'],
+                                explanation: result['explanation'] ?? '',
+                                taskText: widget.taskText,
+                                userPrompt: prompt,
+                                bestPractices: result['bestPractices'],
+                                improvementSuggestions:
+                                    result['improvementSuggestions'],
+                                taskId: widget.taskId,
+                              ),
+                        ),
                       );
                     } else {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
-                          content: Text("Fehler bei der KI-Bewertung"),
+                          content: Text("Fehler bei der Bewertung"),
                         ),
                       );
                     }

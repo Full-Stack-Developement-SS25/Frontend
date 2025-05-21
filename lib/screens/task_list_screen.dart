@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../services/task_service.dart';
 import '../screens/task_screen.dart';
 import '../widgets/task_card.dart';
@@ -14,12 +15,23 @@ class TaskListScreen extends StatefulWidget {
 }
 
 class _TaskListScreenState extends State<TaskListScreen> {
-  late Future<List<Map<String, dynamic>>> _tasksFuture;
+  Future<List<Map<String, dynamic>>>? _tasksFuture;
 
   @override
   void initState() {
     super.initState();
-    _tasksFuture = TaskService.fetchTasks();
+    _loadTasks();
+  }
+
+  Future<void> _loadTasks() async {
+    final prefs = await SharedPreferences.getInstance();
+    final userId = prefs.getString('user_id');
+
+    if (userId != null) {
+      setState(() {
+        _tasksFuture = TaskService.fetchTasks(userId);
+      });
+    }
   }
 
   @override
@@ -37,57 +49,68 @@ class _TaskListScreenState extends State<TaskListScreen> {
           Expanded(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: FutureBuilder<List<Map<String, dynamic>>>(
-                future: _tasksFuture,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(
-                      child: CircularProgressIndicator(color: AppColors.accent),
-                    );
-                  } else if (snapshot.hasError) {
-                    return const Center(
-                      child: Text(
-                        "Fehler beim Laden der Aufgaben",
-                        style: TextStyle(color: AppColors.textSecondary),
-                      ),
-                    );
-                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return const Center(
-                      child: Text(
-                        "Keine Aufgaben gefunden",
-                        style: TextStyle(color: AppColors.textSecondary),
-                      ),
-                    );
-                  }
+              child:
+                  _tasksFuture == null
+                      ? const Center(child: CircularProgressIndicator())
+                      : FutureBuilder<List<Map<String, dynamic>>>(
+                        future: _tasksFuture,
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const Center(
+                              child: CircularProgressIndicator(
+                                color: AppColors.accent,
+                              ),
+                            );
+                          } else if (snapshot.hasError) {
+                            return const Center(
+                              child: Text(
+                                "Fehler beim Laden der Aufgaben",
+                                style: TextStyle(
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                            );
+                          } else if (!snapshot.hasData ||
+                              snapshot.data!.isEmpty) {
+                            return const Center(
+                              child: Text(
+                                "Keine Aufgaben gefunden",
+                                style: TextStyle(
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                            );
+                          }
 
-                  final tasks = snapshot.data!;
-                  return ListView.builder(
-                    itemCount: tasks.length,
-                    itemBuilder: (context, index) {
-                      final task = tasks[index];
-                      return GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder:
-                                  (_) => TaskScreen(
-                                    title: task['title'],
-                                    difficulty: task['difficulty'].toString(),
-                                    taskText: task['description'],
-                                  ),
-                            ),
+                          final tasks = snapshot.data!;
+                          return ListView.builder(
+                            itemCount: tasks.length,
+                            itemBuilder: (context, index) {
+                              final task = tasks[index];
+                              return TaskCard(
+                                title: task['title'],
+                                difficulty: task['difficulty'].toString(),
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder:
+                                          (_) => TaskScreen(
+                                            taskId: task['id'],
+                                            title: task['title'],
+                                            difficulty:
+                                                task['difficulty'].toString(),
+                                            taskText: task['description'],
+                                          ),
+                                    ),
+                                  );
+                                },
+                              );
+                            },
                           );
                         },
-                        child: TaskCard(
-                          title: task['title'],
-                          difficulty: task['difficulty'].toString(),
-                        ),
-                      );
-                    },
-                  );
-                },
-              ),
+                      ),
             ),
           ),
           Padding(
