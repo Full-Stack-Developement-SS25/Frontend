@@ -24,6 +24,7 @@ dependencies:
   firebase_auth_web: ^5.14.3
   js: ^0.6.5
   google_sign_in: ^6.2.1
+  flutter_web_auth: ^0.6.0
 
 
 
@@ -35,3 +36,5 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - lib/assets/github-mark.png

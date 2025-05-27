@@ -29,6 +29,29 @@ class _LoginScreenState extends State<LoginScreen> {
     return password.length >= 6;
   }
 
+  @override
+  void initState() {
+    super.initState();
+
+    // Listener auf Token-Änderungen setzen
+    AuthService.jwtTokenNotifier.addListener(_onTokenChanged);
+  }
+
+  void _onTokenChanged() {
+    final token = AuthService.jwtTokenNotifier.value;
+    print("Token geändert: $token");
+    if (token != null) {
+      _navigateToDashboard(context);
+    }
+  }
+
+  @override
+  void dispose() {
+    AuthService.jwtTokenNotifier.removeListener(_onTokenChanged);
+    // Controller dispose etc.
+    super.dispose();
+  }
+
   Future<void> handleSubmit() async {
     final email = emailController.text.trim();
     final password = passwordController.text.trim();
@@ -52,8 +75,6 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           ),
         );
-
-        _navigateToDashboard(context);
       } else {
         // Fehler aus Backend lesen (hier 'error' oder 'message' prüfen)
         final responseBody = jsonDecode(response.body);
@@ -143,7 +164,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   onPressed: () async {
                     try {
                       await AuthService().signInWithGoogle();
-                      _navigateToDashboard(context);
                     } catch (e) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
@@ -156,19 +176,35 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(height: 20),
                 ElevatedButton.icon(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.black,
-                    foregroundColor: AppColors.white,
+                    backgroundColor: Colors.black,
+                    foregroundColor: Colors.white,
                     minimumSize: const Size(double.infinity, 50),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(15),
                     ),
                   ),
-                  icon: const Icon(Icons.apple, size: 28),
+                  icon: Image.asset(
+                    'lib/assets/github-mark.png',
+                    height: 24,
+                    width: 24,
+                    color: Colors.white,
+                  ),
                   label: const Text(
-                    'Mit Apple anmelden',
+                    'Mit GitHub anmelden',
                     style: TextStyle(fontSize: 16),
                   ),
-                  onPressed: () => _navigateToDashboard(context),
+                  onPressed: () async {
+                    try {
+                      await AuthService.signInWithGitHub(context);
+                      // Navigation entfällt, Listener übernimmt das
+                    } catch (e) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('GitHub Anmeldung fehlgeschlagen: $e'),
+                        ),
+                      );
+                    }
+                  },
                 ),
                 const SizedBox(height: 40),
                 const Text(
