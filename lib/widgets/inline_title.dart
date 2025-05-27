@@ -13,7 +13,7 @@ class InlineTitle extends StatelessWidget {
       style: const TextStyle(
         fontSize: 22,
         fontWeight: FontWeight.bold,
-        color: const Color.fromARGB(255, 221, 115, 45),
+        color: Color.fromARGB(255, 221, 115, 45),
       ),
     );
   }

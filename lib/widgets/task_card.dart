@@ -1,20 +1,25 @@
 import 'package:flutter/material.dart';
-import '../screens/task_screen.dart';
 
 class TaskCard extends StatelessWidget {
   final String title;
   final String difficulty;
+  final VoidCallback onTap;
 
-  const TaskCard({super.key, required this.title, required this.difficulty});
+  const TaskCard({
+    super.key,
+    required this.title,
+    required this.difficulty,
+    required this.onTap,
+  });
 
   Color _getDifficultyColor() {
     switch (difficulty.toLowerCase()) {
       case "leicht":
-        return const Color.fromARGB(255, 34, 21, 53);
+        return const Color.fromARGB(255, 76, 175, 80); // grün
       case "mittel":
-        return const Color.fromARGB(255, 34, 21, 53);
+        return const Color.fromARGB(255, 255, 193, 7); // gelb
       case "schwer":
-        return const Color.fromARGB(255, 34, 21, 53);
+        return const Color.fromARGB(255, 244, 67, 54); // rot
       default:
         return Colors.grey;
     }
@@ -41,33 +46,31 @@ class TaskCard extends StatelessWidget {
       margin: const EdgeInsets.symmetric(vertical: 8),
       elevation: 4,
       child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 12,
+        ),
         leading: Icon(
           _getDifficultyIcon(),
           color: _getDifficultyColor(),
           size: 32,
         ),
         title: Text(
-          "$difficulty",
-          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white, ),
-
+          difficulty,
+          style: const TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
         ),
         subtitle: Text(
-            title,
-            style: const TextStyle(color: Colors.white),
+          title,
+          style: const TextStyle(color: Colors.white),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
         trailing: const Icon(Icons.arrow_forward_ios, color: Colors.white),
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) =>
-                  TaskScreen(title: title, difficulty: difficulty),
-            ),
-          );
-        },
+        onTap: onTap,
       ),
     );
   }

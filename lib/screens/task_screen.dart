@@ -1,13 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:prompt_master/utils/app_colors.dart';
 import '../widgets/section_header.dart';
 import '../widgets/inline_title.dart';
-import './/utils/app_colors.dart';
+import '../services/ai_service.dart';
+import 'evaluation_screen.dart';
 
 class TaskScreen extends StatefulWidget {
+  final String taskId;
   final String title;
   final String difficulty;
+  final String taskText;
 
-  const TaskScreen({super.key, required this.title, required this.difficulty});
+  const TaskScreen({
+    super.key,
+    required this.taskId,
+    required this.title,
+    required this.difficulty,
+    required this.taskText,
+  });
 
   @override
   State<TaskScreen> createState() => _TaskScreenState();
@@ -15,6 +25,7 @@ class TaskScreen extends StatefulWidget {
 
 class _TaskScreenState extends State<TaskScreen> {
   final TextEditingController _controller = TextEditingController();
+  bool isLoading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +33,7 @@ class _TaskScreenState extends State<TaskScreen> {
       backgroundColor: AppColors.primaryBackground,
       appBar: AppBar(
         title: SectionHeader(widget.difficulty),
-        automaticallyImplyLeading: false,
+        automaticallyImplyLeading: true,
         backgroundColor: AppColors.primaryBackground,
         foregroundColor: AppColors.accent,
         elevation: 0,
@@ -33,7 +44,6 @@ class _TaskScreenState extends State<TaskScreen> {
           children: [
             InlineTitle(widget.title),
             const SizedBox(height: 20),
-            // ❗️Expanded mit Column, um Mitte + Footer zu erreichen
             Expanded(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -43,18 +53,16 @@ class _TaskScreenState extends State<TaskScreen> {
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 18,
-                      color: Colors.white,
+                      color: AppColors.white,
                     ),
                   ),
                   const SizedBox(height: 10),
-                  const Text(
-                    "Formuliere einen Prompt, mit dem die KI ein Produkt kreativ beschreiben kann.",
-                    style: TextStyle(color: Colors.white),
+                  Text(
+                    widget.taskText,
+                    style: const TextStyle(color: AppColors.white),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 30),
-
-                  // 🧠 Dynamisch wachsendes Textfeld
                   ConstrainedBox(
                     constraints: const BoxConstraints(
                       minHeight: 50,
@@ -62,15 +70,17 @@ class _TaskScreenState extends State<TaskScreen> {
                     ),
                     child: TextField(
                       controller: _controller,
-                      style: const TextStyle(color: Colors.white),
+                      style: const TextStyle(color: AppColors.white),
                       minLines: 1,
-                      maxLines: null, // macht es "auto-grow"
+                      maxLines: null,
                       expands: false,
                       decoration: InputDecoration(
                         filled: true,
-                        fillColor: Colors.white10,
+                        fillColor: AppColors.fillColor,
                         hintText: "Dein Prompt...",
-                        hintStyle: const TextStyle(color: Colors.white54),
+                        hintStyle: const TextStyle(
+                          color: AppColors.textSecondary,
+                        ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -80,27 +90,81 @@ class _TaskScreenState extends State<TaskScreen> {
                 ],
               ),
             ),
-
-            // 📤 Senden-Button ganz unten, volle Breite
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () {
-                  final prompt = _controller.text.trim();
-                  debugPrint("Prompt gesendet: $prompt");
-                  // TODO: Bewertung auslösen
-                },
+                onPressed:
+                    isLoading
+                        ? null
+                        : () async {
+                          final prompt = _controller.text.trim();
+                          if (prompt.isNotEmpty) {
+                            setState(() {
+                              isLoading = true;
+                            });
+
+                            final result = await AIService.evaluatePrompt(
+                              widget.taskText,
+                              prompt,
+                              widget.taskId,
+                            );
+
+                            setState(() {
+                              isLoading = false;
+                            });
+
+                            if (result != null && result['stars'] != null) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder:
+                                      (_) => EvaluationScreen(
+                                        score: result['stars'],
+                                        explanation:
+                                            result['explanation'] ?? '',
+                                        taskText: widget.taskText,
+                                        userPrompt: prompt,
+                                        bestPractices: result['bestPractices'],
+                                        improvementSuggestions:
+                                            result['improvementSuggestions'],
+                                        taskId: widget.taskId,
+                                      ),
+                                ),
+                              );
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text("Fehler bei der Bewertung"),
+                                ),
+                              );
+                            }
+                          }
+                        },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color.fromARGB(255, 221, 115, 45),
+                  backgroundColor: AppColors.accent,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: const Text(
-                  "Senden",
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
+                child:
+                    isLoading
+                        ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            color: AppColors.white,
+                            strokeWidth: 2.5,
+                          ),
+                        )
+                        : const Text(
+                          "Senden",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.white,
+                          ),
+                        ),
               ),
             ),
           ],
