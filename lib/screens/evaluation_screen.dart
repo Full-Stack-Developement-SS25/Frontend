@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:prompt_master/screens/xp_reward_screen.dart';
 import 'package:prompt_master/utils/app_colors.dart';
+import 'package:prompt_master/utils/xp_logic.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../services/user_service.dart';
 import '../services/task_service.dart';
 import '../widgets/section_header.dart';
 
@@ -9,6 +13,7 @@ class EvaluationScreen extends StatefulWidget {
   final String taskText;
   final String userPrompt;
   final String taskId;
+  final String taskDifficulty; // NEU: Difficulty wird benötigt
   final List<dynamic>? bestPractices;
   final List<dynamic>? improvementSuggestions;
 
@@ -19,6 +24,7 @@ class EvaluationScreen extends StatefulWidget {
     required this.taskText,
     required this.userPrompt,
     required this.taskId,
+    required this.taskDifficulty,
     this.bestPractices,
     this.improvementSuggestions,
   });
@@ -28,6 +34,31 @@ class EvaluationScreen extends StatefulWidget {
 }
 
 class _EvaluationScreenState extends State<EvaluationScreen> {
+  @override
+  void initState() {
+    super.initState();
+    _sendXPAfterEvaluation();
+  }
+
+  Future<void> _sendXPAfterEvaluation() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final userId = prefs.getString('user_id');
+
+      if (userId != null) {
+        await UserService.addXP(
+          userId: userId,
+          difficulty: widget.taskDifficulty,
+          stars: widget.score,
+        );
+      } else {
+        print("⚠️ Kein user_id gefunden");
+      }
+    } catch (e) {
+      print("❌ Fehler bei XP-Vergabe: $e");
+    }
+  }
+
   Widget _buildStars(int count) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -188,12 +219,29 @@ class _EvaluationScreenState extends State<EvaluationScreen> {
                     onPressed: () async {
                       try {
                         await TaskService.markAsDone(widget.taskId);
-                        Navigator.pushNamedAndRemoveUntil(
-                          context,
-                          '/taskList',
-                          (route) => false,
-                        );
 
+                        // Beispielwerte: hole echte Daten aus Backend oder local state
+                        final xp = XPLogic.calculateTotalXP(
+                          widget.taskDifficulty,
+                          widget.score,
+                        );
+                        final prefs = await SharedPreferences.getInstance();
+                        final userXP = prefs.getInt('xp') ?? 0;
+                        final newXP = userXP + xp;
+                        final level = prefs.getInt('level') ?? 1;
+
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder:
+                                (context) => XPRewardScreen(
+                                  xpGained: xp,
+                                  oldXP: userXP,
+                                  newXP: newXP,
+                                  level: level,
+                                ),
+                          ),
+                        );
                       } catch (e) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(content: Text('Fehler beim Markieren: $e')),

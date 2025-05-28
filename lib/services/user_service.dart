@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:prompt_master/utils/xp_logic.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'config.dart';
 
@@ -83,5 +84,26 @@ class UserService {
     } else {
       throw Exception('Fehler beim Abrufen der Badges: ${response.body}');
     }
+  }
+
+  static Future<void> addXP({
+    required String userId,
+    required String difficulty,
+    required int stars,
+  }) async {
+    final int xp = XPLogic.calculateTotalXP(difficulty, stars);
+
+    final url = Uri.parse('http://localhost:3001/api/user/$userId/xp');
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'xp': xp}),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('XP konnte nicht gesendet werden: ${response.body}');
+    }
+
+    print('✅ $xp XP erfolgreich gesendet.');
   }
 }

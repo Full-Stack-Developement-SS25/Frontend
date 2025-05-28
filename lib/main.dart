@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'screens/login_screen.dart';
-import 'screens/task_list_screen.dart'; // Wichtig: importieren
+import 'screens/main_navigation.dart'; // Wichtig: importieren
 
 void main() {
   runApp(const MyApp());
@@ -18,9 +18,9 @@ class MyApp extends StatelessWidget {
       initialRoute: '/login',
       routes: {
         '/login': (context) => const LoginScreen(),
-        '/taskList':
+        '/home':
             (context) =>
-                const TaskListScreen(), // <- Diese Route ist entscheidend
+                const MainNavigation(), // <- deine bestehende Navigation
       },
     );
   }

@@ -128,6 +128,8 @@ class _TaskScreenState extends State<TaskScreen> {
                                         improvementSuggestions:
                                             result['improvementSuggestions'],
                                         taskId: widget.taskId,
+                                        taskDifficulty:
+                                            widget.difficulty, // ✅ hinzugefügt
                                       ),
                                 ),
                               );
