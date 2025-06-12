@@ -15,7 +15,7 @@ class _BadgesTabContentState extends State<BadgesTabContent> {
   @override
   void initState() {
     super.initState();
-    _badgesFuture = UserService.fetchUserBadges();
+    _badgesFuture = UserService.fetchUserBadges() as Future<List<String>>;
   }
 
   @override
