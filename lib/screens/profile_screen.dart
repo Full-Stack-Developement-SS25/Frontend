@@ -27,6 +27,7 @@ class _ProfileScreenState extends State<ProfileScreen>
 
   Future<void> _loadUsername() async {
     final prefs = await SharedPreferences.getInstance();
+    if (!mounted) return;
     final name = prefs.getString('username');
     setState(() {
       _username = name ?? "User";

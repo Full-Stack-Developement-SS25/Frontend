@@ -25,6 +25,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
 
   Future<void> _loadTasks() async {
     final prefs = await SharedPreferences.getInstance();
+    if (!mounted) return;
     final userId = prefs.getString('user_id');
 
     if (userId != null) {

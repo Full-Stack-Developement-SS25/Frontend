@@ -16,7 +16,7 @@ class BadgeTile extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: AppColors.accent.withOpacity(0.3),
+            color: AppColors.accent.withAlpha(77),
             blurRadius: 6,
             offset: const Offset(0, 3),
           ),
