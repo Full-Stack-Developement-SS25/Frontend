@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
+import '../utils/app_colors.dart';
 import '../widgets/section_header.dart';
 
 
@@ -17,12 +18,12 @@ class _JoinEventQRScreenState extends State<JoinEventQRScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 34, 21, 53),
+      backgroundColor: AppColors.primaryBackground,
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: const SectionHeader("QR-Code scannen"),
-        backgroundColor: const Color.fromARGB(255, 34, 21, 53),
-        foregroundColor: const Color.fromARGB(255, 221, 115, 45),
+        backgroundColor: AppColors.primaryBackground,
+        foregroundColor: AppColors.accent,
       ),
       body: Stack(
         children: [
@@ -40,6 +41,7 @@ class _JoinEventQRScreenState extends State<JoinEventQRScreen> {
 
                   // Beispiel: automatisch zurück zur vorherigen Seite
                   Future.delayed(const Duration(milliseconds: 500), () {
+                    if (!mounted) return;
                     Navigator.pop(context);
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text("Beigetreten zu: $code")),

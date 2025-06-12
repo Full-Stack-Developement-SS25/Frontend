@@ -29,7 +29,7 @@ class _ProfileTabContentState extends State<ProfileTabContent> {
           return Center(
             child: Text(
               "Fehler: ${snapshot.error}",
-              style: const TextStyle(color: Colors.white),
+              style: const TextStyle(color: AppColors.white),
             ),
           );
         } else {
@@ -51,7 +51,7 @@ class _ProfileTabContentState extends State<ProfileTabContent> {
                   child: const Icon(
                     Icons.person,
                     size: 50,
-                    color: Colors.white,
+                    color: AppColors.white,
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -59,7 +59,7 @@ class _ProfileTabContentState extends State<ProfileTabContent> {
                   username,
                   style: const TextStyle(
                     fontSize: 24,
-                    color: Colors.white,
+                    color: AppColors.white,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -84,7 +84,7 @@ class _ProfileTabContentState extends State<ProfileTabContent> {
         title: Text(title, style: const TextStyle(color: Colors.white70)),
         trailing: Text(
           value,
-          style: const TextStyle(color: Colors.white, fontSize: 16),
+          style: const TextStyle(color: AppColors.white, fontSize: 16),
         ),
       ),
     );

@@ -59,7 +59,7 @@ class _ScoreboardScreenState extends State<ScoreboardScreen> {
                   decoration: BoxDecoration(
                     color: Colors.white10,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.white24),
+                    border: Border.all(color: AppColors.divider),
                   ),
                   child: Row(
                     children: [
@@ -68,7 +68,7 @@ class _ScoreboardScreenState extends State<ScoreboardScreen> {
                         style: const TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                          color: AppColors.white,
                         ),
                       ),
                       const SizedBox(width: 16),
@@ -81,7 +81,7 @@ class _ScoreboardScreenState extends State<ScoreboardScreen> {
                               style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.white,
+                                color: AppColors.white,
                               ),
                             ),
                             const SizedBox(height: 4),

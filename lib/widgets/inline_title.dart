@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../utils/app_colors.dart';
 
 class InlineTitle extends StatelessWidget {
   final String text;
@@ -13,7 +14,7 @@ class InlineTitle extends StatelessWidget {
       style: const TextStyle(
         fontSize: 22,
         fontWeight: FontWeight.bold,
-        color: Color.fromARGB(255, 221, 115, 45),
+        color: AppColors.accent,
       ),
     );
   }

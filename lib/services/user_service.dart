@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'dart:developer' as developer;
 import 'package:prompt_master/utils/xp_logic.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'config.dart';
@@ -105,6 +106,6 @@ class UserService {
       throw Exception('XP konnte nicht gesendet werden: ${response.body}');
     }
 
-    print('✅ $xp XP erfolgreich gesendet.');
+    developer.log('XP erfolgreich gesendet: $xp', name: 'UserService');
   }
 }
