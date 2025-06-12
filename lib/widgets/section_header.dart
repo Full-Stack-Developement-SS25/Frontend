@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../utils/app_colors.dart';
 
 class SectionHeader extends StatelessWidget {
   final String text;
@@ -10,10 +11,10 @@ class SectionHeader extends StatelessWidget {
     return Text(
       text,
       style: const TextStyle(
-        backgroundColor: Color.fromARGB(255, 34, 21, 53),
+        backgroundColor: AppColors.primaryBackground,
         fontWeight: FontWeight.bold,
         fontSize: 40,
-        color: Color.fromARGB(255, 221, 115, 45),
+        color: AppColors.accent,
       ),
     );
   }

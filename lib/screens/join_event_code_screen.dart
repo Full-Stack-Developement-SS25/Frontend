@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../utils/app_colors.dart';
 import '../widgets/section_header.dart';
 
 
@@ -38,12 +39,12 @@ class _JoinEventCodeScreenState extends State<JoinEventCodeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 34, 21, 53),
+      backgroundColor: AppColors.primaryBackground,
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: const SectionHeader("Code eingeben"),
-        backgroundColor: const Color.fromARGB(255, 34, 21, 53),
-        foregroundColor: const Color.fromARGB(255, 221, 115, 45),
+        backgroundColor: AppColors.primaryBackground,
+        foregroundColor: AppColors.accent,
       ),
       body: Padding(
         padding: const EdgeInsets.all(24),
@@ -57,12 +58,12 @@ class _JoinEventCodeScreenState extends State<JoinEventCodeScreen> {
               children: [
                 const Text(
                   "Gib deinen Event-Code ein:",
-                  style: TextStyle(fontSize: 18, color: Colors.white),
+                  style: TextStyle(fontSize: 18, color: AppColors.white),
                 ),
                 const SizedBox(height: 16),
                 TextField(
                   controller: _codeController,
-                  style: const TextStyle(color: Colors.white),
+                  style: const TextStyle(color: AppColors.white),
                   decoration: InputDecoration(
                     filled: true,
                     fillColor: Colors.white10,
@@ -86,7 +87,7 @@ class _JoinEventCodeScreenState extends State<JoinEventCodeScreen> {
             ElevatedButton(
               onPressed: _joinEvent,
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color.fromARGB(255, 221, 115, 45),
+                backgroundColor: AppColors.accent,
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),

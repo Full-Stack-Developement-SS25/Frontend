@@ -27,6 +27,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Future<void> _initData() async {
     final prefs = await SharedPreferences.getInstance();
+    if (!mounted) return;
     final userId = prefs.getString('user_id');
 
     if (userId != null) {

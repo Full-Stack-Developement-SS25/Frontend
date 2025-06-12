@@ -52,7 +52,7 @@ class _BadgesTabContentState extends State<BadgesTabContent> {
             itemBuilder: (context, index) {
               final badge = badges[index];
               return Card(
-                color: AppColors.accent.withOpacity(0.1),
+                color: AppColors.accent.withAlpha(26),
                 child: BadgeTile(badge: badge),
               );
             },

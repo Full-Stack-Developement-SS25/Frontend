@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:prompt_master/screens/xp_reward_screen.dart';
 import 'package:prompt_master/utils/app_colors.dart';
 import 'package:prompt_master/utils/xp_logic.dart';
+import 'dart:developer' as developer;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/user_service.dart';
 import '../services/task_service.dart';
@@ -52,10 +53,10 @@ class _EvaluationScreenState extends State<EvaluationScreen> {
           stars: widget.score,
         );
       } else {
-        print("⚠️ Kein user_id gefunden");
+        developer.log('Kein user_id gefunden', name: 'EvaluationScreen');
       }
     } catch (e) {
-      print("❌ Fehler bei XP-Vergabe: $e");
+      developer.log('Fehler bei XP-Vergabe: $e', name: 'EvaluationScreen');
     }
   }
 
@@ -219,6 +220,7 @@ class _EvaluationScreenState extends State<EvaluationScreen> {
                     onPressed: () async {
                       try {
                         await TaskService.markAsDone(widget.taskId);
+                        if (!mounted) return;
 
                         // Beispielwerte: hole echte Daten aus Backend oder local state
                         final xp = XPLogic.calculateTotalXP(
@@ -226,6 +228,7 @@ class _EvaluationScreenState extends State<EvaluationScreen> {
                           widget.score,
                         );
                         final prefs = await SharedPreferences.getInstance();
+                        if (!mounted) return;
                         final userXP = prefs.getInt('xp') ?? 0;
                         final newXP = userXP + xp;
                         final level = prefs.getInt('level') ?? 1;

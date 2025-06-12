@@ -108,6 +108,7 @@ class _TaskScreenState extends State<TaskScreen> {
                               prompt,
                               widget.taskId,
                             );
+                            if (!mounted) return;
 
                             setState(() {
                               isLoading = false;
