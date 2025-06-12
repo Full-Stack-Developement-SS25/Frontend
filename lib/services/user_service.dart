@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:prompt_master/utils/xp_logic.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'config.dart';
-import 'package:prompt_master/models/badge.dart';
+import 'package:prompt_master/models/badge.dart' as model;
 
 class UserService {
   /// Holt XP + Level für ein bestimmtes User-ID (wird z. B. vom Dashboard genutzt)
@@ -67,7 +67,7 @@ class UserService {
     }
   }
 
-  static Future<List<Badge>> fetchUserBadges() async {
+  static Future<List<model.Badge>> fetchUserBadges() async {
     final prefs = await SharedPreferences.getInstance();
     final userId = prefs.getString('user_id');
 
@@ -81,7 +81,7 @@ class UserService {
 
     if (response.statusCode == 200) {
       final List<dynamic> data = jsonDecode(response.body);
-      return data.map((e) => Badge.fromJson(e)).toList();
+      return data.map((e) => model.Badge.fromJson(e)).toList();
     } else {
       throw Exception('Fehler beim Abrufen der Badges: ${response.body}');
     }

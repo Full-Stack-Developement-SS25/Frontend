@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:prompt_master/utils/app_colors.dart';
 import 'package:prompt_master/services/user_service.dart';
+import 'package:prompt_master/models/badge.dart' as model;
+import 'package:prompt_master/widgets/badge_tile.dart';
 
 class BadgesTabContent extends StatefulWidget {
   const BadgesTabContent({super.key});
@@ -10,17 +12,17 @@ class BadgesTabContent extends StatefulWidget {
 }
 
 class _BadgesTabContentState extends State<BadgesTabContent> {
-  late Future<List<String>> _badgesFuture;
+  late Future<List<model.Badge>> _badgesFuture;
 
   @override
   void initState() {
     super.initState();
-    _badgesFuture = UserService.fetchUserBadges() as Future<List<String>>;
+    _badgesFuture = UserService.fetchUserBadges();
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<String>>(
+    return FutureBuilder<List<model.Badge>>(
       future: _badgesFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -33,7 +35,7 @@ class _BadgesTabContentState extends State<BadgesTabContent> {
             ),
           );
         } else {
-          final badges = snapshot.data!;
+          final List<model.Badge> badges = snapshot.data!;
 
           if (badges.isEmpty) {
             return const Center(
@@ -48,15 +50,10 @@ class _BadgesTabContentState extends State<BadgesTabContent> {
             padding: const EdgeInsets.all(16),
             itemCount: badges.length,
             itemBuilder: (context, index) {
+              final badge = badges[index];
               return Card(
                 color: AppColors.accent.withOpacity(0.1),
-                child: ListTile(
-                  leading: const Icon(Icons.emoji_events, color: Colors.amber),
-                  title: Text(
-                    badges[index],
-                    style: const TextStyle(color: Colors.white),
-                  ),
-                ),
+                child: BadgeTile(badge: badge),
               );
             },
           );
