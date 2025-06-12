@@ -58,7 +58,7 @@ class _ProfileScreenState extends State<ProfileScreen>
           style: const TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 32,
-            color: Color.fromARGB(255, 221, 115, 45),
+            color: AppColors.accent,
           ),
         ),
         backgroundColor: AppColors.primaryBackground,

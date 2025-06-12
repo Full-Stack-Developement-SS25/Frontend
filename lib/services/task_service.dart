@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'dart:developer' as developer;
 import 'config.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -16,8 +17,8 @@ class TaskService {
 
     final response = await http.get(url);
 
-    print('📡 GET: $url');
-    print('🔁 Antwort: ${response.statusCode} – ${response.body}');
+    developer.log('GET: $url', name: 'TaskService');
+    developer.log('Antwort: ${response.statusCode} – ${response.body}', name: 'TaskService');
 
     if (response.statusCode == 200) {
       final List<dynamic> data = jsonDecode(response.body);
@@ -38,12 +39,12 @@ class TaskService {
 
     final url = Uri.parse('${Config.baseUrl}/user/$userId/task/$taskId/done');
 
-    print('🔁 Aufgabe erledigt markieren: $url');
+    developer.log('Aufgabe erledigt markieren: $url', name: 'TaskService');
 
     final response = await http.post(url);
 
-    print('🔁 Antwortstatus: ${response.statusCode}');
-    print('🔁 Antworttext: ${response.body}');
+    developer.log('Antwortstatus: ${response.statusCode}', name: 'TaskService');
+    developer.log('Antworttext: ${response.body}', name: 'TaskService');
 
     if (response.statusCode != 200) {
       throw Exception(

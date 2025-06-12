@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../utils/app_colors.dart';
 
 class TaskCard extends StatelessWidget {
   final String title;
@@ -41,7 +42,7 @@ class TaskCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      color: const Color.fromARGB(255, 221, 115, 45),
+      color: AppColors.accent,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       margin: const EdgeInsets.symmetric(vertical: 8),
       elevation: 4,
@@ -60,16 +61,16 @@ class TaskCard extends StatelessWidget {
           style: const TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
-            color: Colors.white,
+            color: AppColors.white,
           ),
         ),
         subtitle: Text(
           title,
-          style: const TextStyle(color: Colors.white),
+          style: const TextStyle(color: AppColors.white),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
-        trailing: const Icon(Icons.arrow_forward_ios, color: Colors.white),
+        trailing: const Icon(Icons.arrow_forward_ios, color: AppColors.white),
         onTap: onTap,
       ),
     );

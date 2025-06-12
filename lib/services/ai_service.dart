@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'dart:developer' as developer;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'config.dart';
 
@@ -13,7 +14,7 @@ class AIService {
     final userId = prefs.getString('user_id');
 
     if (userId == null) {
-      print("❌ Kein User angemeldet");
+      developer.log('Kein User angemeldet', name: 'AIService');
       return null;
     }
 
@@ -31,8 +32,8 @@ class AIService {
         }),
       );
 
-      print("🔁 Bewertung senden: ${response.statusCode}");
-      print("🔁 Antworttext: ${response.body}");
+      developer.log('Bewertung senden: ${response.statusCode}', name: 'AIService');
+      developer.log('Antworttext: ${response.body}', name: 'AIService');
 
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
@@ -40,7 +41,7 @@ class AIService {
         return null;
       }
     } catch (e) {
-      print('❌ Netzwerkfehler: $e');
+      developer.log('Netzwerkfehler: $e', name: 'AIService');
       return null;
     }
   }

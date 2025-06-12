@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../utils/app_colors.dart';
 import 'join_event_qr_screen.dart';
 import 'join_event_code_screen.dart';
 import '../widgets/section_header.dart';
@@ -11,12 +12,12 @@ class ChooseJoinMethodScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 34, 21, 53),
+      backgroundColor: AppColors.primaryBackground,
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: const SectionHeader("Event beitreten"),
-        backgroundColor: const Color.fromARGB(255, 34, 21, 53),
-        foregroundColor: const Color.fromARGB(255, 221, 115, 45),
+        backgroundColor: AppColors.primaryBackground,
+        foregroundColor: AppColors.accent,
       ),
       body: Padding(
         padding: const EdgeInsets.all(24.0),
@@ -26,7 +27,7 @@ class ChooseJoinMethodScreen extends StatelessWidget {
           children: [
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color.fromARGB(255, 221, 115, 45),
+                backgroundColor: AppColors.accent,
                 padding: const EdgeInsets.symmetric(vertical: 30),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
