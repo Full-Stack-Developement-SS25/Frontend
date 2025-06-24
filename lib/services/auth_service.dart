@@ -256,7 +256,7 @@ class AuthService {
 
   static const String _githubClientIdWeb = 'Ov23licXnBkr2GAOsSEQ';
   static const String _redirectUriGithubWeb =
-      'http://localhost:3000/api/auth/github/callback';
+      'http://localhost:52141/api/auth/github/callback';
 
   static const String _githubClientIdAndroid = 'Ov23lihyDNWv2856JvJI';
   static const String _redirectUriGithubAndroid =
