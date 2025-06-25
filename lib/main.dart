@@ -3,6 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:prompt_master/firebase_options.dart';
 import 'screens/login_screen.dart';
+import 'screens/main_navigation.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -57,7 +58,7 @@ class _MyAppState extends State<MyApp> {
       debugShowCheckedModeBanner: false,
       title: 'PromptMaster',
       theme: ThemeData(),
-      home: const LoginScreen(), // Start Screen
+      home: _loggedIn ? const MainNavigation() : const LoginScreen(),
     );
   }
 }
