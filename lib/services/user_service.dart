@@ -108,4 +108,19 @@ class UserService {
 
     developer.log('XP erfolgreich gesendet: $xp', name: 'UserService');
   }
+
+  static Future<void> updateLevel(String userId, int level) async {
+    final url = Uri.parse('${Config.baseUrl}/user/$userId/level');
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'level': level}),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Level konnte nicht aktualisiert werden: ${response.body}');
+    }
+
+    developer.log('Level erfolgreich aktualisiert: $level', name: 'UserService');
+  }
 }
