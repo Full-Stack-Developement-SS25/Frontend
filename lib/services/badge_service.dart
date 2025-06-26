@@ -29,6 +29,14 @@ class BadgeService {
     return fetchBadges(userId);
   }
 
+    /// Gibt die Anzahl der aktuell freigeschalteten Badges des eingeloggten
+  /// Nutzers zurück.
+  static Future<int> fetchCurrentUserBadgeCount() async {
+    final badges = await fetchCurrentUserBadges();
+    return badges.length;
+  }
+
+
   /// Prüft, ob neue Badges freigeschaltet wurden.
   /// Gibt eine Liste neu freigeschalteter Badges zurück und
   /// speichert diese lokal, um mehrfache Benachrichtigungen zu vermeiden.

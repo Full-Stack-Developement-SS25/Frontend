@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../utils/app_colors.dart';
 import '../services/user_service.dart';
+import '../services/badge_service.dart';
 
 class ProfileTabContent extends StatefulWidget {
   const ProfileTabContent({super.key});
@@ -10,18 +11,28 @@ class ProfileTabContent extends StatefulWidget {
 }
 
 class _ProfileTabContentState extends State<ProfileTabContent> {
-  late Future<Map<String, dynamic>> _userStatsFuture;
+  late Future<Map<String, dynamic>> _profileDataFuture;
 
   @override
   void initState() {
     super.initState();
-    _userStatsFuture = UserService.getFreshUserStats();
+    _profileDataFuture = _loadProfileData();
+  }
+
+  Future<Map<String, dynamic>> _loadProfileData() async {
+    final stats = await UserService.getFreshUserStats();
+    final summary = await UserService.fetchUserStatsSummary();
+    return {
+      ...stats,
+      'badgeCount': summary['badgeCount'],
+      'completedTasks': summary['completedTasks'],
+    };
   }
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<Map<String, dynamic>>(
-      future: _userStatsFuture,
+      future: _profileDataFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
@@ -37,8 +48,8 @@ class _ProfileTabContentState extends State<ProfileTabContent> {
           final username = data["username"] ?? "Unbekannt";
           final level = data["level"];
           final xp = data["xp"];
-          final completedTasks = 3; // Optional dynamisch machen
-          final badgeCount = 2; // Optional dynamisch machen
+          final completedTasks = data["completedTasks"] ?? 0;
+          final badgeCount = data["badgeCount"] ?? 0;
 
           return SingleChildScrollView(
             padding: const EdgeInsets.all(20),

@@ -5,6 +5,7 @@ import 'package:prompt_master/utils/xp_logic.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'config.dart';
 import 'package:prompt_master/models/badge.dart' as model;
+import 'badge_service.dart';
 
 class UserService {
   /// Holt XP + Level für ein bestimmtes User-ID (wird z. B. vom Dashboard genutzt)
@@ -88,6 +89,35 @@ class UserService {
     }
   }
 
+   /// Gibt eine Zusammenfassung der Nutzerstatistiken zurueck
+  /// (z.B. Anzahl freigeschalteter Badges und erledigter Aufgaben).
+  static Future<Map<String, int>> fetchUserStatsSummary() async {
+    final prefs = await SharedPreferences.getInstance();
+    final userId = prefs.getString('user_id');
+
+    if (userId == null) {
+      throw Exception('❌ Kein user_id gefunden.');
+    }
+
+    final badgeCount = await BadgeService.fetchCurrentUserBadgeCount();
+
+    final completedUrl = Uri.parse(
+      '${Config.baseUrl}/user/$userId/completed-count',
+    );
+    final completedResponse = await http.get(completedUrl);
+
+    if (completedResponse.statusCode == 200) {
+      final completedData = jsonDecode(completedResponse.body);
+      final int completedTasks = completedData['completedTasks'] ?? 0;
+
+      return {'badgeCount': badgeCount, 'completedTasks': completedTasks};
+    } else {
+      throw Exception(
+        'Fehler beim Abrufen der erledigten Aufgaben: ${completedResponse.body}',
+      );
+    }
+  }
+
   static Future<void> addXP({
     required String userId,
     required String difficulty,
@@ -95,7 +125,7 @@ class UserService {
   }) async {
     final int xp = XPLogic.calculateTotalXP(difficulty, stars);
 
-    final url = Uri.parse('http://localhost:3001/api/user/$userId/xp');
+    final url = Uri.parse('http://localhost:3000/api/user/$userId/xp');
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},
@@ -108,4 +138,20 @@ class UserService {
 
     developer.log('XP erfolgreich gesendet: $xp', name: 'UserService');
   }
+
+  static Future<void> updateLevel(String userId, int level) async {
+    final url = Uri.parse('${Config.baseUrl}/user/$userId/level');
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'level': level}),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Level konnte nicht aktualisiert werden: ${response.body}');
+    }
+
+    developer.log('Level erfolgreich aktualisiert: $level', name: 'UserService');
+  }
+
 }

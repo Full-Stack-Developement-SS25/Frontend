@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:prompt_master/utils/app_colors.dart';
 import 'package:prompt_master/services/badge_service.dart';
+import 'package:prompt_master/utils/xp_logic.dart';
 
 class XPRewardScreen extends StatefulWidget {
   final int xpGained;
@@ -24,15 +25,16 @@ class _XPRewardScreenState extends State<XPRewardScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _xpAnimation;
-
-  final int maxXP = 100; // Beispielwert für XP bis nächstes Level
+  late final int maxXP;
 
   @override
   void initState() {
     super.initState();
 
-    final double start = widget.oldXP / maxXP;
-    final double end = widget.newXP / maxXP;
+    maxXP = XPLogic.xpForLevel(widget.level);
+
+    final double start = (widget.oldXP / maxXP).clamp(0.0, 1.0);
+    final double end = (widget.newXP / maxXP).clamp(0.0, 1.0);
 
     _controller = AnimationController(
       vsync: this,
@@ -57,7 +59,9 @@ class _XPRewardScreenState extends State<XPRewardScreen>
     for (final badge in newBadges) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('🎉 Du hast das Badge "${badge.title}" freigeschaltet!'),
+          content: Text(
+            '🎉 Du hast das Badge "${badge.title}" freigeschaltet!',
+          ),
         ),
       );
     }
@@ -71,8 +75,6 @@ class _XPRewardScreenState extends State<XPRewardScreen>
 
   @override
   Widget build(BuildContext context) {
-    final int progressXP = widget.newXP % maxXP;
-
     return Scaffold(
       backgroundColor: AppColors.primaryBackground,
       appBar: AppBar(
@@ -120,7 +122,7 @@ class _XPRewardScreenState extends State<XPRewardScreen>
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      "${(progressXP).clamp(0, maxXP)} / $maxXP XP",
+                      "${widget.newXP.clamp(0, maxXP)} / $maxXP XP",
                       style: const TextStyle(color: AppColors.white),
                     ),
                   ],
