@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:prompt_master/firebase_options.dart';
 import 'screens/login_screen.dart';
 import 'screens/main_navigation.dart';
+import 'services/auth_service.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -45,10 +47,35 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
-  void _checkInitialLoginStatus() {
+  void _checkInitialLoginStatus() async {
     final token = html.window.localStorage['jwt_token'];
+    if (token != null) {
+      setState(() {
+        _loggedIn = true;
+      });
+      return;
+    }
+
+    // Prüfen, ob wir von GitHub mit einem Code zurückgeleitet wurden
+    if (kIsWeb && Uri.base.path == '/api/auth/github/callback') {
+      final code = Uri.base.queryParameters['code'];
+      if (code != null) {
+        try {
+          await AuthService.completeGitHubLogin(code);
+          setState(() {
+            _loggedIn = true;
+          });
+          // Query-Parameter aus der URL entfernen
+          html.window.history.replaceState(null, '', '/');
+          return;
+        } catch (e) {
+          print('GitHub Callback Fehler: $e');
+        }
+      }
+    }
+
     setState(() {
-      _loggedIn = token != null;
+      _loggedIn = false;
     });
   }
 

@@ -289,7 +289,15 @@ class AuthService {
       print(
         'Starte FlutterWebAuth.authenticate mit URL: ${authUrl.toString()} und Scheme: $callbackScheme',
       );
-      //#TODO bleibt hier HÄNGEN! prüfen!
+
+      if (kIsWeb) {
+        // Auf Web-Plattformen leiten wir den Browser direkt zu GitHub um.
+        // Nach erfolgreichem Login wird unsere Anwendung mit dem
+        // "code"-Parameter neu geladen.
+        html.window.location.assign(authUrl.toString());
+        return;
+      }
+
       final result = await FlutterWebAuth.authenticate(
         url: authUrl.toString(),
         callbackUrlScheme: callbackScheme,
@@ -302,45 +310,50 @@ class AuthService {
       }
       print('GitHub Auth Code erhalten: $code');
 
-      final response = await http.post(
-        Uri.parse('$_baseUrl/auth/github-login'),
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode({'code': code, 'platform': kIsWeb ? 'web' : 'app'}),
-      );
-
-      print('Backend Response Status: ${response.statusCode}');
-      print('Backend Response Body: ${response.body}');
-
-      if (response.statusCode == 200) {
-        final body = json.decode(response.body);
-        final token = body['token'];
-
-        if (token == null || token.isEmpty) {
-          throw Exception('Kein JWT Token vom Backend erhalten');
-        }
-
-        await _saveToken(token);
-        print('✅ JWT Token gespeichert: $token');
-        print('Navigator-Aufruf wird ausgeführt, token gespeichert.');
-        Navigator.of(
-          context,
-        ).pushReplacement(MaterialPageRoute(builder: (_) => DashboardScreen()));
-        // Optional: Token aus Notifier prüfen
-        if (jwtTokenNotifier.value == null) {
-          print('Warnung: JWT Token Notifier hat keinen Wert nach Speicherung');
-        } else {
-          print('JWT Token Notifier Wert: ${jwtTokenNotifier.value}');
-        }
+      await completeGitHubLogin(code);
+      print('Navigator-Aufruf wird ausgeführt, token gespeichert.');
+      Navigator.of(
+        context,
+      ).pushReplacement(MaterialPageRoute(builder: (_) => DashboardScreen()));
+      // Optional: Token aus Notifier prüfen
+      if (jwtTokenNotifier.value == null) {
+        print('Warnung: JWT Token Notifier hat keinen Wert nach Speicherung');
       } else {
-        final body = json.decode(response.body);
-        throw Exception(
-          'Backend Fehler: ${body['error'] ?? body['message'] ?? 'Unbekannter Fehler'}',
-        );
+        print('JWT Token Notifier Wert: ${jwtTokenNotifier.value}');
       }
     } catch (e, stacktrace) {
       print('GitHub Login Fehler: $e');
       print(stacktrace);
       rethrow;
+    }
+  }
+
+  /// Verarbeitet den von GitHub erhaltenen Code (Web-Callback)
+  static Future<void> completeGitHubLogin(String code) async {
+    final response = await http.post(
+      Uri.parse('$_baseUrl/auth/github-login'),
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode({'code': code, 'platform': 'web'}),
+    );
+
+    print('Backend Response Status: ${response.statusCode}');
+    print('Backend Response Body: ${response.body}');
+
+    if (response.statusCode == 200) {
+      final body = json.decode(response.body);
+      final token = body['token'];
+
+      if (token == null || token.isEmpty) {
+        throw Exception('Kein JWT Token vom Backend erhalten');
+      }
+
+      await _saveToken(token);
+      print('✅ JWT Token gespeichert: $token');
+    } else {
+      final body = json.decode(response.body);
+      throw Exception(
+        'Backend Fehler: ${body['error'] ?? body['message'] ?? 'Unbekannter Fehler'}',
+      );
     }
   }
 }
