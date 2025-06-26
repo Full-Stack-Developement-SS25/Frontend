@@ -21,10 +21,12 @@ dependencies:
   shared_preferences: ^2.2.2
   firebase_core: ^3.13.1
   firebase_auth: ^5.5.4
-  firebase_auth_web: ^5.14.3
+  flutter_web_auth_2:
+    git:
+      url: https://github.com/ThexXTURBOXx/flutter_web_auth_2.git
+      path: flutter_web_auth_2
   js: ^0.6.5
   google_sign_in: ^6.2.1
-  flutter_web_auth: ^0.6.0
 
 
 

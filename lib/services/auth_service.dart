@@ -1,14 +1,14 @@
 import 'dart:convert';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_web_auth/flutter_web_auth.dart';
+import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:logging/logging.dart';
 import 'package:prompt_master/screens/dashboard_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'config.dart';
-import 'dart:html' as html;
+import '../html_universal.dart' as html;
 import 'package:flutter/material.dart';
 
 class AuthService {
@@ -298,7 +298,7 @@ class AuthService {
         return;
       }
 
-      final result = await FlutterWebAuth.authenticate(
+      final result = await FlutterWebAuth2.authenticate(
         url: authUrl.toString(),
         callbackUrlScheme: callbackScheme,
       );
