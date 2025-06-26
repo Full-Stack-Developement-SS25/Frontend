@@ -95,7 +95,7 @@ class UserService {
   }) async {
     final int xp = XPLogic.calculateTotalXP(difficulty, stars);
 
-    final url = Uri.parse('http://localhost:3001/api/user/$userId/xp');
+    final url = Uri.parse('http://localhost:3000/api/user/$userId/xp');
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},
