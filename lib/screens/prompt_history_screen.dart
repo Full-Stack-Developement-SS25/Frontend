@@ -47,9 +47,9 @@ class _PromptHistoryScreenState extends State<PromptHistoryScreen> {
       });
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Fehler beim Löschen: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Fehler beim Löschen: $e')));
     }
   }
 
@@ -67,27 +67,39 @@ class _PromptHistoryScreenState extends State<PromptHistoryScreen> {
         future: _historyFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(
+              child: CircularProgressIndicator(color: AppColors.accent),
+            );
           } else if (snapshot.hasError) {
             return Center(
-              child: Text('Fehler: ${snapshot.error}'),
+              child: Text(
+                'Fehler: ${snapshot.error}',
+                style: const TextStyle(color: Colors.red),
+              ),
             );
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('Keine Daten verfügbar'));
+            return const Center(
+              child: Text(
+                'Keine Prompts vorhanden.',
+                style: TextStyle(color: AppColors.white),
+              ),
+            );
           } else {
             if (_history.isEmpty) {
               _history = List<Map<String, dynamic>>.from(snapshot.data!);
             }
+
             return ListView.builder(
               padding: const EdgeInsets.all(16),
               itemCount: _history.length,
               itemBuilder: (context, index) {
                 final item = _history[index];
                 final id = item['id'] ?? item['promptId'];
-                final prompt = item['prompt'] ?? '';
+                final prompt = item['content'] ?? 'Kein Inhalt';
                 final created = item['created_at'] ?? '';
-                final rating = item['rating'];
+                final score = item['score'];
                 final feedback = item['feedback'];
+                final keywords = item['keyword_hits'];
 
                 return Dismissible(
                   key: Key('$id'),
@@ -110,13 +122,21 @@ class _PromptHistoryScreenState extends State<PromptHistoryScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        /// 📝 Prompt Text
                         Text(
                           prompt,
-                          maxLines: 2,
+                          maxLines: 3,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(color: AppColors.white),
+                          style: const TextStyle(
+                            color: AppColors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
+
                         const SizedBox(height: 8),
+
+                        /// 📅 Datum
                         Text(
                           _formatDate(created),
                           style: const TextStyle(
@@ -124,16 +144,38 @@ class _PromptHistoryScreenState extends State<PromptHistoryScreen> {
                             fontSize: 12,
                           ),
                         ),
-                        if (rating != null) ...[
+
+                        /// ⭐ Bewertung
+                        if (score != null) ...[
                           const SizedBox(height: 8),
-                          _buildStars(rating is int ? rating : int.tryParse('$rating') ?? 0),
+                          _buildStars(
+                            score is int ? score : int.tryParse('$score') ?? 0,
+                          ),
                         ],
-                        if (feedback != null && feedback.toString().isNotEmpty)
+
+                        /// 🔑 Keyword-Hits
+                        if (keywords != null &&
+                            keywords.toString().isNotEmpty) ...[
+                          const SizedBox(height: 6),
+                          Text(
+                            'Keyword Treffer: ${keywords.toString()}',
+                            style: const TextStyle(
+                              color: AppColors.textSecondary,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+
+                        /// 🗒️ Feedback
+                        if (feedback != null &&
+                            feedback.toString().trim().isNotEmpty)
                           ExpansionTile(
                             tilePadding: EdgeInsets.zero,
+                            collapsedIconColor: AppColors.accent,
+                            iconColor: AppColors.accent,
                             title: const Text(
                               'Mehr anzeigen',
-                              style: TextStyle(color: AppColors.white),
+                              style: TextStyle(color: AppColors.accent),
                             ),
                             children: [
                               Align(
@@ -142,7 +184,10 @@ class _PromptHistoryScreenState extends State<PromptHistoryScreen> {
                                   padding: const EdgeInsets.only(bottom: 8),
                                   child: Text(
                                     feedback,
-                                    style: const TextStyle(color: AppColors.white),
+                                    style: const TextStyle(
+                                      color: AppColors.white,
+                                      fontSize: 14,
+                                    ),
                                   ),
                                 ),
                               ),
