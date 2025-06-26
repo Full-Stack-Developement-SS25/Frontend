@@ -21,10 +21,11 @@ class _ProfileTabContentState extends State<ProfileTabContent> {
 
   Future<Map<String, dynamic>> _loadProfileData() async {
     final stats = await UserService.getFreshUserStats();
-    final badgeCount = await BadgeService.fetchCurrentUserBadgeCount();
+    final summary = await UserService.fetchUserStatsSummary();
     return {
       ...stats,
-      'badgeCount': badgeCount,
+      'badgeCount': summary['badgeCount'],
+      'completedTasks': summary['completedTasks'],
     };
   }
 
@@ -47,7 +48,7 @@ class _ProfileTabContentState extends State<ProfileTabContent> {
           final username = data["username"] ?? "Unbekannt";
           final level = data["level"];
           final xp = data["xp"];
-          final completedTasks = 3; // Optional dynamisch machen
+          final completedTasks = data["completedTasks"] ?? 0;
           final badgeCount = data["badgeCount"] ?? 0;
 
           return SingleChildScrollView(
