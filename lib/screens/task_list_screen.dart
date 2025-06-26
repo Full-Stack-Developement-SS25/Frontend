@@ -5,6 +5,7 @@ import '../screens/task_screen.dart';
 import '../widgets/task_card.dart';
 import '../widgets/section_header.dart';
 import 'choose_join_method_screen.dart';
+import 'prompt_history_screen.dart';
 import '../utils/app_colors.dart';
 
 class TaskListScreen extends StatefulWidget {
@@ -135,6 +136,34 @@ class _TaskListScreenState extends State<TaskListScreen> {
                     context,
                     MaterialPageRoute(
                       builder: (_) => const ChooseJoinMethodScreen(),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.accent,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                icon: const Icon(Icons.history, size: 30),
+                label: const Text(
+                  "Prompt-Historie",
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const PromptHistoryScreen(),
                     ),
                   );
                 },
