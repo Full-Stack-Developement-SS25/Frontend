@@ -9,6 +9,7 @@ class AIService {
     String taskText,
     String prompt,
     String taskId,
+    String model,
   ) async {
     final userId = await AuthService.getUserId();
 
@@ -28,6 +29,7 @@ class AIService {
           'prompt': prompt,
           'userId': userId,
           'taskId': taskId,
+          'model': model,
         }),
       );
 

@@ -3,7 +3,10 @@ import 'package:prompt_master/utils/app_colors.dart';
 import '../widgets/section_header.dart';
 import '../widgets/inline_title.dart';
 import '../services/ai_service.dart';
+import '../services/config.dart';
 import 'evaluation_screen.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 class TaskScreen extends StatefulWidget {
   final String taskId;
@@ -26,6 +29,29 @@ class TaskScreen extends StatefulWidget {
 class _TaskScreenState extends State<TaskScreen> {
   final TextEditingController _controller = TextEditingController();
   bool isLoading = false;
+  List<String> _models = ['gpt4o mini'];
+  String _selectedModel = 'gpt4o mini';
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchModels();
+  }
+
+  Future<void> _fetchModels() async {
+    try {
+      final response = await http.get(Uri.parse('${Config.baseUrl}/models'));
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = jsonDecode(response.body);
+        setState(() {
+          _models = data.keys.cast<String>().toList();
+          if (!_models.contains(_selectedModel)) {
+            _selectedModel = 'gpt4o mini';
+          }
+        });
+      }
+    } catch (_) {}
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -63,6 +89,33 @@ class _TaskScreenState extends State<TaskScreen> {
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 30),
+                  DropdownButton<String>(
+                    value: _selectedModel,
+                    dropdownColor: AppColors.fillColor,
+                    iconEnabledColor: AppColors.white,
+                    items:
+                        _models
+                            .map(
+                              (m) => DropdownMenuItem(
+                                value: m,
+                                child: Text(
+                                  m,
+                                  style: const TextStyle(
+                                    color: AppColors.white,
+                                  ),
+                                ),
+                              ),
+                            )
+                            .toList(),
+                    onChanged: (value) {
+                      if (value != null) {
+                        setState(() {
+                          _selectedModel = value;
+                        });
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 10),
                   ConstrainedBox(
                     constraints: const BoxConstraints(
                       minHeight: 50,
@@ -107,6 +160,7 @@ class _TaskScreenState extends State<TaskScreen> {
                               widget.taskText,
                               prompt,
                               widget.taskId,
+                              _selectedModel,
                             );
                             if (!mounted) return;
 

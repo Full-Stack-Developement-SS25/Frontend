@@ -85,7 +85,11 @@ class _MyAppState extends State<MyApp> {
       debugShowCheckedModeBanner: false,
       title: 'PromptMaster',
       theme: ThemeData(),
-      home: _loggedIn ? const MainNavigation() : const LoginScreen(),
+      initialRoute: _loggedIn ? '/home' : '/login',
+      routes: {
+        '/login': (context) => const LoginScreen(),
+        '/home': (context) => const MainNavigation(),
+      },
     );
   }
 }
