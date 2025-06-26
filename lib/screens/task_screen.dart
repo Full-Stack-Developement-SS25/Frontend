@@ -46,11 +46,41 @@ class _TaskScreenState extends State<TaskScreen> {
         setState(() {
           _models = data.keys.cast<String>().toList();
           if (!_models.contains(_selectedModel)) {
-            _selectedModel = 'gpt4o mini';
+            _selectedModel = _models.isNotEmpty ? _models.first : 'gpt4o mini';
           }
         });
       }
     } catch (_) {}
+  }
+
+  void _showModelSelection(BuildContext context) {
+    showModalBottomSheet(
+      backgroundColor: AppColors.accent,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      context: context,
+      builder: (context) {
+        return ListView(
+          shrinkWrap: true,
+          children:
+              _models.map((model) {
+                return ListTile(
+                  title: Text(
+                    model,
+                    style: const TextStyle(color: AppColors.white),
+                  ),
+                  onTap: () {
+                    setState(() {
+                      _selectedModel = model;
+                    });
+                    Navigator.pop(context);
+                  },
+                );
+              }).toList(),
+        );
+      },
+    );
   }
 
   @override
@@ -70,79 +100,119 @@ class _TaskScreenState extends State<TaskScreen> {
           children: [
             InlineTitle(widget.title),
             const SizedBox(height: 20),
+
+            // Zentraler Bereich (Aufgabenstellung + Prompt)
             Expanded(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text(
-                    "Aufgabenstellung:",
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18,
-                      color: AppColors.white,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    widget.taskText,
-                    style: const TextStyle(color: AppColors.white),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 30),
-                  DropdownButton<String>(
-                    value: _selectedModel,
-                    dropdownColor: AppColors.fillColor,
-                    iconEnabledColor: AppColors.white,
-                    items:
-                        _models
-                            .map(
-                              (m) => DropdownMenuItem(
-                                value: m,
-                                child: Text(
-                                  m,
-                                  style: const TextStyle(
-                                    color: AppColors.white,
-                                  ),
-                                ),
-                              ),
-                            )
-                            .toList(),
-                    onChanged: (value) {
-                      if (value != null) {
-                        setState(() {
-                          _selectedModel = value;
-                        });
-                      }
-                    },
-                  ),
-                  const SizedBox(height: 10),
-                  ConstrainedBox(
-                    constraints: const BoxConstraints(
-                      minHeight: 50,
-                      maxHeight: 200,
-                    ),
-                    child: TextField(
-                      controller: _controller,
-                      style: const TextStyle(color: AppColors.white),
-                      minLines: 1,
-                      maxLines: null,
-                      expands: false,
-                      decoration: InputDecoration(
-                        filled: true,
-                        fillColor: AppColors.fillColor,
-                        hintText: "Dein Prompt...",
-                        hintStyle: const TextStyle(
-                          color: AppColors.textSecondary,
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 600),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text(
+                        "Aufgabenstellung:",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                          color: AppColors.white,
                         ),
                       ),
-                    ),
+                      const SizedBox(height: 10),
+                      Text(
+                        widget.taskText,
+                        style: const TextStyle(
+                          color: AppColors.white,
+                          fontSize: 16,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 30),
+
+                      const Text(
+                        "Dein Prompt:",
+                        style: TextStyle(
+                          color: AppColors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      TextField(
+                        controller: _controller,
+                        style: const TextStyle(color: AppColors.white),
+                        minLines: 3,
+                        maxLines: 6,
+                        textAlign: TextAlign.center,
+                        decoration: InputDecoration(
+                          filled: true,
+                          fillColor: AppColors.fillColor,
+                          hintText: "Dein Prompt...",
+                          hintStyle: const TextStyle(
+                            color: AppColors.textSecondary,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
+
+            const SizedBox(height: 20),
+
+            // Model Auswahl als Modal
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  "KI-Modell auswählen",
+                  style: TextStyle(
+                    color: AppColors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                GestureDetector(
+                  onTap: () => _showModelSelection(context),
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 18,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.fillColor,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: AppColors.textSecondary),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          _selectedModel,
+                          style: const TextStyle(
+                            color: AppColors.white,
+                            fontSize: 16,
+                          ),
+                        ),
+                        const Icon(
+                          Icons.arrow_drop_down,
+                          color: AppColors.white,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 16),
+
+            // Senden Button
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
@@ -183,8 +253,7 @@ class _TaskScreenState extends State<TaskScreen> {
                                         improvementSuggestions:
                                             result['improvementSuggestions'],
                                         taskId: widget.taskId,
-                                        taskDifficulty:
-                                            widget.difficulty, // ✅ hinzugefügt
+                                        taskDifficulty: widget.difficulty,
                                       ),
                                 ),
                               );

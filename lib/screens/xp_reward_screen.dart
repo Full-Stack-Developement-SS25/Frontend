@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:prompt_master/utils/app_colors.dart';
 import 'package:prompt_master/services/badge_service.dart';
 import 'package:prompt_master/utils/xp_logic.dart';
+import 'main_navigation.dart';
 
 class XPRewardScreen extends StatefulWidget {
   final int xpGained;
@@ -134,9 +135,11 @@ class _XPRewardScreenState extends State<XPRewardScreen>
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () {
-                  Navigator.pushNamedAndRemoveUntil(
+                  Navigator.pushAndRemoveUntil(
                     context,
-                    '/home',
+                    MaterialPageRoute(
+                      builder: (_) => const MainNavigation(initialIndex: 1),
+                    ),
                     (route) => false,
                   );
                 },
