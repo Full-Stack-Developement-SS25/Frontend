@@ -36,8 +36,9 @@ class _PromptHistoryScreenState extends State<PromptHistoryScreen> {
       });
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Fehler beim Löschen: $e')));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Fehler beim Löschen: $e')));
     }
   }
 
@@ -101,7 +102,8 @@ class _PromptHistoryScreenState extends State<PromptHistoryScreen> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => PromptHistoryDetailScreen(entry: item),
+                          builder:
+                              (_) => PromptHistoryDetailScreen(entry: item),
                         ),
                       );
                     },

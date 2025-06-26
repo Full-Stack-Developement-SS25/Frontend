@@ -46,7 +46,7 @@ class PromptHistoryDetailScreen extends StatelessWidget {
     final created = entry['created_at'] ?? '';
     final content = entry['content'] ?? '';
     final score = entry['score'];
-    final feedback = entry['feedback'];
+    final explanation = entry['explanation'] ?? entry['feedback'];
     final keywordHits = entry['keyword_hits'];
 
     return Scaffold(
@@ -88,24 +88,32 @@ class PromptHistoryDetailScreen extends StatelessWidget {
             const SizedBox(height: 20),
             _sectionTitle('Datum:'),
             const SizedBox(height: 8),
-            Text(_formatDate(created),
-                style: const TextStyle(color: AppColors.white)),
+            Text(
+              _formatDate(created),
+              style: const TextStyle(color: AppColors.white),
+            ),
             const SizedBox(height: 20),
             _sectionTitle('Der eingegebene Prompt:'),
             const SizedBox(height: 8),
             Text(content, style: const TextStyle(color: AppColors.white)),
             const SizedBox(height: 20),
-            if (feedback != null && feedback.toString().trim().isNotEmpty) ...[
-              _sectionTitle('Feedback:'),
+            if (explanation != null &&
+                explanation.toString().trim().isNotEmpty) ...[
+              _sectionTitle('Begründung:'),
               const SizedBox(height: 8),
-              Text('$feedback', style: const TextStyle(color: AppColors.white)),
+              Text(
+                '$explanation',
+                style: const TextStyle(color: AppColors.white),
+              ),
               const SizedBox(height: 20),
             ],
             if (keywordHits != null && keywordHits.toString().isNotEmpty) ...[
               _sectionTitle('Keyword Treffer:'),
               const SizedBox(height: 8),
-              Text('$keywordHits',
-                  style: const TextStyle(color: AppColors.white)),
+              Text(
+                '$keywordHits',
+                style: const TextStyle(color: AppColors.white),
+              ),
             ],
           ],
         ),
