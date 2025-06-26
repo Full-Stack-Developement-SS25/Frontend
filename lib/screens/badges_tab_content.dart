@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:prompt_master/utils/app_colors.dart';
-import 'package:prompt_master/services/user_service.dart';
+import 'package:prompt_master/services/badge_service.dart';
 import 'package:prompt_master/models/badge.dart' as model;
-import 'package:prompt_master/widgets/badge_tile.dart';
+import 'package:prompt_master/widgets/badge_grid.dart';
 
 class BadgesTabContent extends StatefulWidget {
   const BadgesTabContent({super.key});
@@ -17,7 +17,7 @@ class _BadgesTabContentState extends State<BadgesTabContent> {
   @override
   void initState() {
     super.initState();
-    _badgesFuture = UserService.fetchUserBadges();
+    _badgesFuture = BadgeService.fetchCurrentUserBadges();
   }
 
   @override
@@ -46,17 +46,7 @@ class _BadgesTabContentState extends State<BadgesTabContent> {
             );
           }
 
-          return ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: badges.length,
-            itemBuilder: (context, index) {
-              final badge = badges[index];
-              return Card(
-                color: AppColors.accent.withAlpha(26),
-                child: BadgeTile(badge: badge),
-              );
-            },
-          );
+          return BadgeGrid(badges: badges);
         }
       },
     );

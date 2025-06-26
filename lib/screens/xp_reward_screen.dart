@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:prompt_master/utils/app_colors.dart';
+import 'package:prompt_master/services/badge_service.dart';
 
 class XPRewardScreen extends StatefulWidget {
   final int xpGained;
@@ -44,6 +45,22 @@ class _XPRewardScreenState extends State<XPRewardScreen>
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
 
     _controller.forward();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _showNewBadgeInfo();
+    });
+  }
+
+  Future<void> _showNewBadgeInfo() async {
+    final newBadges = await BadgeService.checkForNewBadges();
+    if (!mounted || newBadges.isEmpty) return;
+    for (final badge in newBadges) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('🎉 Du hast das Badge "${badge.title}" freigeschaltet!'),
+        ),
+      );
+    }
   }
 
   @override
