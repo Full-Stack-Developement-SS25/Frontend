@@ -2,15 +2,14 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'dart:developer' as developer;
 import 'config.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'auth_service.dart';
 
 class TaskService {
-  static Future<List<Map<String, dynamic>>> fetchTasks(String userId) async {
-    final prefs = await SharedPreferences.getInstance();
-    final userId = prefs.getString('user_id');
+  static Future<List<Map<String, dynamic>>> fetchTasks() async {
+    final userId = await AuthService.getUserId();
 
     if (userId == null) {
-      throw Exception("❌ Kein Benutzer angemeldet");
+      throw Exception('❌ Kein Benutzer angemeldet');
     }
 
     final url = Uri.parse('${Config.baseUrl}/tasks/$userId'); // ← wichtig!
@@ -30,11 +29,10 @@ class TaskService {
 
 
   static Future<void> markAsDone(String taskId) async {
-    final prefs = await SharedPreferences.getInstance();
-    final userId = prefs.getString('user_id');
+    final userId = await AuthService.getUserId();
 
     if (userId == null) {
-      throw Exception("❌ Kein Benutzer angemeldet (user_id fehlt)");
+      throw Exception('❌ Kein Benutzer angemeldet (user_id fehlt)');
     }
 
     final url = Uri.parse('${Config.baseUrl}/user/$userId/task/$taskId/done');

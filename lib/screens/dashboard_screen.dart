@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/percent_indicator.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:prompt_master/services/user_service.dart';
 import 'package:prompt_master/services/task_service.dart';
+import 'package:prompt_master/services/auth_service.dart';
 import 'package:prompt_master/utils/app_colors.dart';
 import 'package:prompt_master/utils/xp_logic.dart';
 import '../widgets/task_card.dart';
@@ -27,14 +27,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Future<void> _initData() async {
-    final prefs = await SharedPreferences.getInstance();
+    final userId = await AuthService.getUserId();
     if (!mounted) return;
-    final userId = prefs.getString('user_id');
 
     if (userId != null) {
       setState(() {
         _userStats = UserService.fetchUserStats(userId);
-        _tasksFuture = TaskService.fetchTasks(userId);
+        _tasksFuture = TaskService.fetchTasks();
       });
     }
   }

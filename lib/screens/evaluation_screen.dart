@@ -6,6 +6,7 @@ import 'dart:developer' as developer;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/user_service.dart';
 import '../services/task_service.dart';
+import '../services/auth_service.dart';
 import '../widgets/section_header.dart';
 
 class EvaluationScreen extends StatefulWidget {
@@ -49,7 +50,7 @@ class _EvaluationScreenState extends State<EvaluationScreen> {
   Future<void> _updateXPAndLevel() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final userId = prefs.getString('user_id');
+      final userId = await AuthService.getUserId();
 
       if (userId == null) {
         developer.log('Kein user_id gefunden', name: 'EvaluationScreen');

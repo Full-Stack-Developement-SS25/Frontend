@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'config.dart';
 import 'package:prompt_master/models/badge.dart';
+import 'auth_service.dart';
 
 class BadgeService {
   static Future<List<Badge>> fetchBadges(String userId) async {
@@ -19,8 +20,7 @@ class BadgeService {
   }
 
   static Future<List<Badge>> fetchCurrentUserBadges() async {
-    final prefs = await SharedPreferences.getInstance();
-    final userId = prefs.getString('user_id');
+    final userId = await AuthService.getUserId();
 
     if (userId == null) {
       throw Exception('❌ Kein user_id gefunden.');
