@@ -5,6 +5,7 @@ import 'package:prompt_master/utils/xp_logic.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'config.dart';
 import 'package:prompt_master/models/badge.dart' as model;
+import 'badge_service.dart';
 
 class UserService {
   /// Holt XP + Level für ein bestimmtes User-ID (wird z. B. vom Dashboard genutzt)
@@ -88,6 +89,35 @@ class UserService {
     }
   }
 
+   /// Gibt eine Zusammenfassung der Nutzerstatistiken zurueck
+  /// (z.B. Anzahl freigeschalteter Badges und erledigter Aufgaben).
+  static Future<Map<String, int>> fetchUserStatsSummary() async {
+    final prefs = await SharedPreferences.getInstance();
+    final userId = prefs.getString('user_id');
+
+    if (userId == null) {
+      throw Exception('❌ Kein user_id gefunden.');
+    }
+
+    final badgeCount = await BadgeService.fetchCurrentUserBadgeCount();
+
+    final completedUrl = Uri.parse(
+      '${Config.baseUrl}/user/$userId/completed-count',
+    );
+    final completedResponse = await http.get(completedUrl);
+
+    if (completedResponse.statusCode == 200) {
+      final completedData = jsonDecode(completedResponse.body);
+      final int completedTasks = completedData['completedTasks'] ?? 0;
+
+      return {'badgeCount': badgeCount, 'completedTasks': completedTasks};
+    } else {
+      throw Exception(
+        'Fehler beim Abrufen der erledigten Aufgaben: ${completedResponse.body}',
+      );
+    }
+  }
+
   static Future<void> addXP({
     required String userId,
     required String difficulty,
@@ -123,4 +153,5 @@ class UserService {
 
     developer.log('Level erfolgreich aktualisiert: $level', name: 'UserService');
   }
+
 }
