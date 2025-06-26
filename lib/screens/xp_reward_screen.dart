@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:prompt_master/utils/app_colors.dart';
 import 'package:prompt_master/services/badge_service.dart';
+import 'package:prompt_master/utils/xp_logic.dart';
 
 class XPRewardScreen extends StatefulWidget {
   final int xpGained;
@@ -24,12 +25,13 @@ class _XPRewardScreenState extends State<XPRewardScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _xpAnimation;
-
-  final int maxXP = 100; // Beispielwert für XP bis nächstes Level
+  late final int maxXP;
 
   @override
   void initState() {
     super.initState();
+
+    maxXP = XPLogic.xpForLevel(widget.level);
 
     final double start = widget.oldXP / maxXP;
     final double end = widget.newXP / maxXP;
@@ -71,7 +73,8 @@ class _XPRewardScreenState extends State<XPRewardScreen>
 
   @override
   Widget build(BuildContext context) {
-    final int progressXP = widget.newXP % maxXP;
+    final int progressXP =
+        widget.newXP - XPLogic.cumulativeXPForLevel(widget.level);
 
     return Scaffold(
       backgroundColor: AppColors.primaryBackground,

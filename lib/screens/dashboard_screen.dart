@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:prompt_master/services/user_service.dart';
 import 'package:prompt_master/services/task_service.dart';
 import 'package:prompt_master/utils/app_colors.dart';
+import 'package:prompt_master/utils/xp_logic.dart';
 import '../widgets/task_card.dart';
 import '../widgets/section_header.dart';
 import 'task_screen.dart';
@@ -61,8 +62,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   } else {
                     final xp = snapshot.data!['xp'] as int;
                     final level = snapshot.data!['level'] as int;
-                    const int xpNeeded = 100;
-                    final double progress = (xp / xpNeeded).clamp(0.0, 1.0);
+                    final int xpNeeded = XPLogic.xpForLevel(level);
+                    final int progressXP =
+                        xp - XPLogic.cumulativeXPForLevel(level);
+                    final double progress =
+                        (progressXP / xpNeeded).clamp(0.0, 1.0);
 
                     return Padding(
                       padding: const EdgeInsets.all(16.0),
@@ -105,7 +109,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 ),
                                 const SizedBox(height: 10),
                                 Text(
-                                  "XP: $xp / $xpNeeded",
+                                  "XP: $progressXP / $xpNeeded",
                                   style: const TextStyle(
                                     fontSize: 20,
                                     color: AppColors.accent,

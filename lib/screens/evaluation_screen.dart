@@ -35,26 +35,51 @@ class EvaluationScreen extends StatefulWidget {
 }
 
 class _EvaluationScreenState extends State<EvaluationScreen> {
+  int? _oldXP;
+  int? _newXP;
+  int? _level;
+  late int _xpGained;
+
   @override
   void initState() {
     super.initState();
-    _sendXPAfterEvaluation();
+    _xpGained = XPLogic.calculateTotalXP(widget.taskDifficulty, widget.score);
   }
 
-  Future<void> _sendXPAfterEvaluation() async {
+  Future<void> _updateXPAndLevel() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final userId = prefs.getString('user_id');
 
-      if (userId != null) {
-        await UserService.addXP(
-          userId: userId,
-          difficulty: widget.taskDifficulty,
-          stars: widget.score,
-        );
-      } else {
+      if (userId == null) {
         developer.log('Kein user_id gefunden', name: 'EvaluationScreen');
+        return;
       }
+
+      final before = await UserService.fetchUserStats(userId);
+      _oldXP = before['xp'];
+      int level = before['level'];
+
+      await UserService.addXP(
+        userId: userId,
+        difficulty: widget.taskDifficulty,
+        stars: widget.score,
+      );
+
+      final after = await UserService.fetchUserStats(userId);
+      _newXP = after['xp'];
+      level = after['level'];
+
+      final int xpNeeded = XPLogic.xpForLevel(level);
+      if (_newXP! >= xpNeeded) {
+        level += 1;
+        await UserService.updateLevel(userId, level);
+      }
+
+      _level = level;
+
+      await prefs.setInt('xp', _newXP!);
+      await prefs.setInt('level', _level!);
     } catch (e) {
       developer.log('Fehler bei XP-Vergabe: $e', name: 'EvaluationScreen');
     }
@@ -220,29 +245,18 @@ class _EvaluationScreenState extends State<EvaluationScreen> {
                     onPressed: () async {
                       try {
                         await TaskService.markAsDone(widget.taskId);
+                        await _updateXPAndLevel();
                         if (!mounted) return;
-
-                        // Beispielwerte: hole echte Daten aus Backend oder local state
-                        final xp = XPLogic.calculateTotalXP(
-                          widget.taskDifficulty,
-                          widget.score,
-                        );
-                        final prefs = await SharedPreferences.getInstance();
-                        if (!mounted) return;
-                        final userXP = prefs.getInt('xp') ?? 0;
-                        final newXP = userXP + xp;
-                        final level = prefs.getInt('level') ?? 1;
 
                         Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
-                            builder:
-                                (context) => XPRewardScreen(
-                                  xpGained: xp,
-                                  oldXP: userXP,
-                                  newXP: newXP,
-                                  level: level,
-                                ),
+                            builder: (context) => XPRewardScreen(
+                              xpGained: _xpGained,
+                              oldXP: _oldXP ?? 0,
+                              newXP: _newXP ?? 0,
+                              level: _level ?? 1,
+                            ),
                           ),
                         );
                       } catch (e) {
