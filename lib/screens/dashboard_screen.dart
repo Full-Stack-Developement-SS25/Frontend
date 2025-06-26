@@ -63,10 +63,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     final xp = snapshot.data!['xp'] as int;
                     final level = snapshot.data!['level'] as int;
                     final int xpNeeded = XPLogic.xpForLevel(level);
-                    final int progressXP =
-                        xp - XPLogic.cumulativeXPForLevel(level);
-                    final double progress =
-                        (progressXP / xpNeeded).clamp(0.0, 1.0);
+                    final int progressXP = xp;
+                    final double progress = (progressXP / xpNeeded).clamp(
+                      0.0,
+                      1.0,
+                    );
 
                     return Padding(
                       padding: const EdgeInsets.all(16.0),
