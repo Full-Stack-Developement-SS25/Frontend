@@ -15,8 +15,7 @@ class LoginScreen extends StatefulWidget {
 class LoginScreenState extends State<LoginScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  final TextEditingController usernameController =
-      TextEditingController(); // NEU
+  final TextEditingController usernameController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   bool isPasswordVisible = false;
@@ -30,7 +29,30 @@ class LoginScreenState extends State<LoginScreen> {
     return password.length >= 6;
   }
 
-  void handleSubmit() async {
+  @override
+  void initState() {
+    super.initState();
+
+    // Listener auf Token-Änderungen setzen
+    AuthService.jwtTokenNotifier.addListener(_onTokenChanged);
+  }
+
+  void _onTokenChanged() {
+    final token = AuthService.jwtTokenNotifier.value;
+    print("Token geändert: $token");
+    if (token != null) {
+      _navigateToDashboard(context);
+    }
+  }
+
+  @override
+  void dispose() {
+    AuthService.jwtTokenNotifier.removeListener(_onTokenChanged);
+    // Controller dispose etc.
+    super.dispose();
+  }
+
+  Future<void> handleSubmit() async {
     final email = emailController.text.trim();
     final password = passwordController.text.trim();
     final username = usernameController.text.trim();
@@ -41,8 +63,7 @@ class LoginScreenState extends State<LoginScreen> {
       final response =
           isLoginMode
               ? await AuthService.login(email, password)
-              : await AuthService.register(email, password, username); // NEU
-      if (!mounted) return;
+              : await AuthService.register(email, password, username);
 
       if (response.statusCode == 200) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -54,10 +75,13 @@ class LoginScreenState extends State<LoginScreen> {
             ),
           ),
         );
-        _navigateToDashboard(context);
       } else {
+        // Fehler aus Backend lesen (hier 'error' oder 'message' prüfen)
+        final responseBody = jsonDecode(response.body);
         final errorMsg =
-            jsonDecode(response.body)['message'] ?? "Unbekannter Fehler";
+            responseBody['error'] ??
+            responseBody['message'] ??
+            "Unbekannter Fehler";
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text("Fehler: $errorMsg")));
@@ -77,13 +101,16 @@ class LoginScreenState extends State<LoginScreen> {
     final email = emailController.text.trim();
     if (!isEmailValid(email)) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Bitte eine gültige E-Mail-Adresse eingeben!")),
+        const SnackBar(
+          content: Text("Bitte eine gültige E-Mail-Adresse eingeben!"),
+        ),
       );
       return;
     }
 
+    // Hier könntest du noch eine Funktion im AuthService aufrufen für Passwort zurücksetzen
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
+      const SnackBar(
         content: Text(
           "Ein Link zum Zurücksetzen des Passworts wurde an Ihre E-Mail gesendet.",
         ),
@@ -134,24 +161,50 @@ class LoginScreenState extends State<LoginScreen> {
                     'Mit Google anmelden',
                     style: TextStyle(fontSize: 16),
                   ),
-                  onPressed: () => _navigateToDashboard(context),
+                  onPressed: () async {
+                    try {
+                      await AuthService().signInWithGoogle();
+                    } catch (e) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Google Anmeldung fehlgeschlagen: $e'),
+                        ),
+                      );
+                    }
+                  },
                 ),
                 const SizedBox(height: 20),
                 ElevatedButton.icon(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.black,
-                    foregroundColor: AppColors.white,
+                    backgroundColor: Colors.black,
+                    foregroundColor: Colors.white,
                     minimumSize: const Size(double.infinity, 50),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(15),
                     ),
                   ),
-                  icon: const Icon(Icons.apple, size: 28),
+                  icon: Image.asset(
+                    'lib/assets/github-mark.png',
+                    height: 24,
+                    width: 24,
+                    color: Colors.white,
+                  ),
                   label: const Text(
-                    'Mit Apple anmelden',
+                    'Mit GitHub anmelden',
                     style: TextStyle(fontSize: 16),
                   ),
-                  onPressed: () => _navigateToDashboard(context),
+                  onPressed: () async {
+                    try {
+                      await AuthService.signInWithGitHub(context);
+                      // Navigation entfällt, Listener übernimmt das
+                    } catch (e) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('GitHub Anmeldung fehlgeschlagen: $e'),
+                        ),
+                      );
+                    }
+                  },
                 ),
                 const SizedBox(height: 40),
                 const Text(
