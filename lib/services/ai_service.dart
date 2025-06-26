@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'dart:developer' as developer;
-import 'package:shared_preferences/shared_preferences.dart';
+import 'auth_service.dart';
 import 'config.dart';
 
 class AIService {
@@ -10,8 +10,7 @@ class AIService {
     String prompt,
     String taskId,
   ) async {
-    final prefs = await SharedPreferences.getInstance();
-    final userId = prefs.getString('user_id');
+    final userId = await AuthService.getUserId();
 
     if (userId == null) {
       developer.log('Kein User angemeldet', name: 'AIService');

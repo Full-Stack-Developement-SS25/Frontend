@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'config.dart';
 import 'package:prompt_master/models/badge.dart' as model;
 import 'badge_service.dart';
+import 'auth_service.dart';
 
 class UserService {
   /// Holt XP + Level für ein bestimmtes User-ID (wird z. B. vom Dashboard genutzt)
@@ -46,7 +47,7 @@ class UserService {
   /// Holt immer aktuelle Daten des eingeloggten Nutzers (für Profilseite)
   static Future<Map<String, dynamic>> getFreshUserStats() async {
     final prefs = await SharedPreferences.getInstance();
-    final userId = prefs.getString('user_id');
+    final userId = await AuthService.getUserId();
 
     if (userId == null) {
       throw Exception("❌ Kein user_id in SharedPreferences gefunden.");
@@ -71,7 +72,7 @@ class UserService {
 
   static Future<List<model.Badge>> fetchUserBadges() async {
     final prefs = await SharedPreferences.getInstance();
-    final userId = prefs.getString('user_id');
+    final userId = await AuthService.getUserId();
 
     if (userId == null) {
       throw Exception("❌ Kein user_id gefunden.");
@@ -93,7 +94,7 @@ class UserService {
   /// (z.B. Anzahl freigeschalteter Badges und erledigter Aufgaben).
   static Future<Map<String, int>> fetchUserStatsSummary() async {
     final prefs = await SharedPreferences.getInstance();
-    final userId = prefs.getString('user_id');
+    final userId = await AuthService.getUserId();
 
     if (userId == null) {
       throw Exception('❌ Kein user_id gefunden.');

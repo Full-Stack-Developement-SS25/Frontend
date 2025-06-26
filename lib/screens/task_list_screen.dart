@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import '../services/auth_service.dart';
 import '../services/task_service.dart';
 import '../screens/task_screen.dart';
 import '../widgets/task_card.dart';
@@ -24,13 +24,12 @@ class _TaskListScreenState extends State<TaskListScreen> {
   }
 
   Future<void> _loadTasks() async {
-    final prefs = await SharedPreferences.getInstance();
+    final userId = await AuthService.getUserId();
     if (!mounted) return;
-    final userId = prefs.getString('user_id');
 
     if (userId != null) {
       setState(() {
-        _tasksFuture = TaskService.fetchTasks(userId);
+        _tasksFuture = TaskService.fetchTasks();
       });
     }
   }
