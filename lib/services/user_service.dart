@@ -155,4 +155,63 @@ class UserService {
     developer.log('Level erfolgreich aktualisiert: $level', name: 'UserService');
   }
 
+  /// Prüft, ob der aktuell eingeloggte Nutzer Premium ist
+  static Future<bool> isPremiumUser() async {
+    final userId = await AuthService.getUserId();
+    final token = await AuthService.getToken();
+
+    developer.log('[isPremiumUser] userId: $userId', name: 'UserService');
+    developer.log('[isPremiumUser] token: $token', name: 'UserService');
+
+    if (userId == null || token == null) {
+      developer.log('❌ Kein userId oder Token gefunden', name: 'UserService');
+      throw Exception('❌ Fehlende Anmeldedaten.');
+    }
+
+    final url = Uri.parse('${Config.baseUrl}/user/$userId/premium');
+    developer.log('[isPremiumUser] Request URL: $url', name: 'UserService');
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {'Authorization': 'Bearer $token'},
+      );
+
+      developer.log(
+        '[isPremiumUser] Response Status: ${response.statusCode}',
+        name: 'UserService',
+      );
+      developer.log(
+        '[isPremiumUser] Response Body: ${response.body}',
+        name: 'UserService',
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        developer.log(
+          '[isPremiumUser] Parsed Data: $data',
+          name: 'UserService',
+        );
+
+        final isPremium = data['isPremium'] as bool? ?? false;
+        developer.log(
+          '[isPremiumUser] isPremium: $isPremium',
+          name: 'UserService',
+        );
+
+        return isPremium;
+      } else {
+        developer.log(
+          '❌ Fehler beim Abrufen des Premium-Status: ${response.body}',
+          name: 'UserService',
+        );
+        return false;
+      }
+    } catch (e) {
+      developer.log('❌ Fehler in isPremiumUser(): $e', name: 'UserService');
+      return false;
+    }
+  }
+
+
 }

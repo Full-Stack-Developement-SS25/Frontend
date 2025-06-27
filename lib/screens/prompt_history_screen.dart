@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../utils/app_colors.dart';
 import '../widgets/section_header.dart';
 import '../services/prompt_history_service.dart';
+import '../services/user_service.dart';
 import 'prompt_history_detail_screen.dart';
 
 class PromptHistoryScreen extends StatefulWidget {
@@ -12,13 +13,34 @@ class PromptHistoryScreen extends StatefulWidget {
 }
 
 class _PromptHistoryScreenState extends State<PromptHistoryScreen> {
-  late Future<List<Map<String, dynamic>>> _historyFuture;
+  Future<List<Map<String, dynamic>>>? _historyFuture;
   List<Map<String, dynamic>> _history = [];
 
   @override
   void initState() {
     super.initState();
-    _historyFuture = PromptHistoryService.fetchPromptHistory();
+    _checkPremium();
+  }
+
+  Future<void> _checkPremium() async {
+    final premium = await UserService.isPremiumUser();
+    if (!premium) {
+      if (!mounted) return;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        showDialog(
+          context: context,
+          builder: (context) => const AlertDialog(
+            content: Text(
+              'Dieses Feature ist nur für Premium-Nutzer verfügbar.',
+            ),
+          ),
+        );
+      });
+    } else {
+      setState(() {
+        _historyFuture = PromptHistoryService.fetchPromptHistory();
+      });
+    }
   }
 
   String _formatDate(String iso) {
@@ -52,9 +74,11 @@ class _PromptHistoryScreenState extends State<PromptHistoryScreen> {
         foregroundColor: AppColors.accent,
         elevation: 0,
       ),
-      body: FutureBuilder<List<Map<String, dynamic>>>(
-        future: _historyFuture,
-        builder: (context, snapshot) {
+      body: _historyFuture == null
+          ? const SizedBox.shrink()
+          : FutureBuilder<List<Map<String, dynamic>>>(
+              future: _historyFuture,
+              builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(
               child: CircularProgressIndicator(color: AppColors.accent),

@@ -40,11 +40,18 @@ class _EvaluationScreenState extends State<EvaluationScreen> {
   int? _newXP;
   int? _level;
   late int _xpGained;
+  bool _isPremium = false;
 
   @override
   void initState() {
     super.initState();
     _xpGained = XPLogic.calculateTotalXP(widget.taskDifficulty, widget.score);
+    _checkPremium();
+  }
+
+  Future<void> _checkPremium() async {
+    _isPremium = await UserService.isPremiumUser();
+    if (mounted) setState(() {});
   }
 
   Future<void> _updateXPAndLevel() async {
@@ -195,23 +202,32 @@ class _EvaluationScreenState extends State<EvaluationScreen> {
               ),
             ],
 
-            if (widget.bestPractices != null &&
+            if (_isPremium &&
+                widget.bestPractices != null &&
                 widget.bestPractices!.isNotEmpty) ...[
               const SizedBox(height: 20),
-              const Text(
-                "Best Practices:",
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
-                  color: AppColors.accent,
+              ExpansionTile(
+                title: const Text(
+                  'Best Practices',
+                  style: TextStyle(color: AppColors.white),
                 ),
+                children: widget.bestPractices!
+                    .map(
+                      (s) => ListTile(
+                        title: Text(
+                          s,
+                          style: const TextStyle(color: AppColors.white),
+                        ),
+                      ),
+                    )
+                    .toList(),
               ),
-              const SizedBox(height: 8),
-              ...widget.bestPractices!.map(
-                (s) => Text(
-                  "- $s",
-                  style: const TextStyle(color: AppColors.white),
-                ),
+            ]
+            else if (!_isPremium) ...[
+              const SizedBox(height: 20),
+              const Text(
+                'Best Practices sind nur für Premium-Nutzer verfügbar.',
+                style: TextStyle(color: AppColors.textSecondary),
               ),
             ],
 
