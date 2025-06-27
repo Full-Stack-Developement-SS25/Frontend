@@ -8,6 +8,7 @@ import 'choose_join_method_screen.dart';
 import 'prompt_history_screen.dart';
 import '../services/user_service.dart';
 import '../utils/app_colors.dart';
+import '../utils/premium_required_dialog.dart';
 
 class TaskListScreen extends StatefulWidget {
   const TaskListScreen({super.key});
@@ -94,31 +95,30 @@ class _TaskListScreenState extends State<TaskListScreen> {
                                 title: task['title'],
                                 difficulty: task['difficulty'].toString(),
                                 onTap: () async {
-                                  final difficulty = task['difficulty']?.toString().toLowerCase();
+                                  final difficulty =
+                                      task['difficulty']
+                                          ?.toString()
+                                          .toLowerCase();
                                   if (difficulty == 'schwer') {
-                                    final premium = await UserService.isPremiumUser();
+                                    final premium =
+                                        await UserService.isPremiumUser();
                                     if (!premium) {
                                       if (!mounted) return;
-                                      showDialog(
-                                        context: context,
-                                        builder: (context) => const AlertDialog(
-                                          content: Text(
-                                            'Dieses Feature ist nur für Premium-Nutzer verfügbar.',
-                                          ),
-                                        ),
-                                      );
+                                      showPremiumRequiredDialog(context);
                                       return;
                                     }
                                   }
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (_) => TaskScreen(
-                                        taskId: task['id'],
-                                        title: task['title'],
-                                        difficulty: task['difficulty'].toString(),
-                                        taskText: task['description'],
-                                      ),
+                                      builder:
+                                          (_) => TaskScreen(
+                                            taskId: task['id'],
+                                            title: task['title'],
+                                            difficulty:
+                                                task['difficulty'].toString(),
+                                            taskText: task['description'],
+                                          ),
                                     ),
                                   );
                                 },
@@ -178,14 +178,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
                   final premium = await UserService.isPremiumUser();
                   if (!premium) {
                     if (!mounted) return;
-                    showDialog(
-                      context: context,
-                      builder: (context) => const AlertDialog(
-                        content: Text(
-                          'Dieses Feature ist nur für Premium-Nutzer verfügbar.',
-                        ),
-                      ),
-                    );
+                    showPremiumRequiredDialog(context);
                     return;
                   }
                   Navigator.push(

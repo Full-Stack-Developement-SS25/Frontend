@@ -213,5 +213,36 @@ class UserService {
     }
   }
 
+static Future<void> buyPremium() async {
+    final userId = await AuthService.getUserId();
+    final token = await AuthService.getToken();
+
+    if (userId == null || token == null) {
+      throw Exception('❌ Fehlende Anmeldedaten.');
+    }
+
+    final url = Uri.parse('${Config.baseUrl}/user/$userId/premium/buy');
+
+    final response = await http.post(
+      url,
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      developer.log('✅ Premium erfolgreich gekauft', name: 'UserService');
+    } else {
+      developer.log(
+        '❌ Fehler beim Premium-Kauf: ${response.body}',
+        name: 'UserService',
+      );
+      throw Exception(
+        'Fehler beim Premium-Kauf: ${response.statusCode} ${response.body}',
+      );
+    }
+  }
+
 
 }

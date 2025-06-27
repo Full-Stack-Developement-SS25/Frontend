@@ -5,6 +5,7 @@ import '../widgets/inline_title.dart';
 import '../services/ai_service.dart';
 import '../services/config.dart';
 import '../services/user_service.dart';
+import '../utils/premium_required_dialog.dart'; // 🔥 NEU
 import 'evaluation_screen.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -58,14 +59,7 @@ class _TaskScreenState extends State<TaskScreen> {
     final isPremium = await UserService.isPremiumUser();
     if (!isPremium) {
       if (!mounted) return;
-      showDialog(
-        context: context,
-        builder: (context) => const AlertDialog(
-          content: Text(
-            'Dieses Feature ist nur für Premium-Nutzer verfügbar.',
-          ),
-        ),
-      );
+      showPremiumRequiredDialog(context);
       return;
     }
 

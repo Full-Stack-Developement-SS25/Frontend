@@ -4,6 +4,7 @@ import '../widgets/section_header.dart';
 import '../services/prompt_history_service.dart';
 import '../services/user_service.dart';
 import 'prompt_history_detail_screen.dart';
+import '../utils/premium_required_dialog.dart'; // 🔥 Neuer Import
 
 class PromptHistoryScreen extends StatefulWidget {
   const PromptHistoryScreen({super.key});
@@ -27,14 +28,7 @@ class _PromptHistoryScreenState extends State<PromptHistoryScreen> {
     if (!premium) {
       if (!mounted) return;
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        showDialog(
-          context: context,
-          builder: (context) => const AlertDialog(
-            content: Text(
-              'Dieses Feature ist nur für Premium-Nutzer verfügbar.',
-            ),
-          ),
-        );
+        showPremiumRequiredDialog(context);
       });
     } else {
       setState(() {
@@ -74,101 +68,109 @@ class _PromptHistoryScreenState extends State<PromptHistoryScreen> {
         foregroundColor: AppColors.accent,
         elevation: 0,
       ),
-      body: _historyFuture == null
-          ? const SizedBox.shrink()
-          : FutureBuilder<List<Map<String, dynamic>>>(
-              future: _historyFuture,
-              builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(
-              child: CircularProgressIndicator(color: AppColors.accent),
-            );
-          } else if (snapshot.hasError) {
-            return Center(
-              child: Text(
-                'Fehler: ${snapshot.error}',
-                style: const TextStyle(color: Colors.red),
-              ),
-            );
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(
-              child: Text(
-                'Keine Prompts vorhanden.',
-                style: TextStyle(color: AppColors.white),
-              ),
-            );
-          } else {
-            if (_history.isEmpty) {
-              _history = List<Map<String, dynamic>>.from(snapshot.data!);
-            }
-
-            return ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: _history.length,
-              itemBuilder: (context, index) {
-                final item = _history[index];
-                final id = item['id'] ?? item['promptId'];
-                final title = item['title'] ?? 'Prompt';
-                final created = item['created_at'] ?? '';
-
-                return Dismissible(
-                  key: Key('$id'),
-                  direction: DismissDirection.endToStart,
-                  background: Container(
-                    padding: const EdgeInsets.only(right: 20),
-                    alignment: Alignment.centerRight,
-                    color: Colors.red,
-                    child: const Icon(Icons.delete, color: AppColors.white),
-                  ),
-                  onDismissed: (_) => _deletePrompt('$id', index),
-                  child: GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder:
-                              (_) => PromptHistoryDetailScreen(entry: item),
-                        ),
+      body:
+          _historyFuture == null
+              ? const SizedBox.shrink()
+              : FutureBuilder<List<Map<String, dynamic>>>(
+                future: _historyFuture,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(
+                      child: CircularProgressIndicator(color: AppColors.accent),
+                    );
+                  } else if (snapshot.hasError) {
+                    return Center(
+                      child: Text(
+                        'Fehler: ${snapshot.error}',
+                        style: const TextStyle(color: Colors.red),
+                      ),
+                    );
+                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return const Center(
+                      child: Text(
+                        'Keine Prompts vorhanden.',
+                        style: TextStyle(color: AppColors.white),
+                      ),
+                    );
+                  } else {
+                    if (_history.isEmpty) {
+                      _history = List<Map<String, dynamic>>.from(
+                        snapshot.data!,
                       );
-                    },
-                    child: Container(
-                      width: double.infinity,
-                      margin: const EdgeInsets.only(bottom: 12),
+                    }
+
+                    return ListView.builder(
                       padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.white10,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: AppColors.divider),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            title,
-                            style: const TextStyle(
+                      itemCount: _history.length,
+                      itemBuilder: (context, index) {
+                        final item = _history[index];
+                        final id = item['id'] ?? item['promptId'];
+                        final title = item['title'] ?? 'Prompt';
+                        final created = item['created_at'] ?? '';
+
+                        return Dismissible(
+                          key: Key('$id'),
+                          direction: DismissDirection.endToStart,
+                          background: Container(
+                            padding: const EdgeInsets.only(right: 20),
+                            alignment: Alignment.centerRight,
+                            color: Colors.red,
+                            child: const Icon(
+                              Icons.delete,
                               color: AppColors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
                             ),
                           ),
-                          const SizedBox(height: 8),
-                          Text(
-                            _formatDate(created),
-                            style: const TextStyle(
-                              color: AppColors.textSecondary,
-                              fontSize: 12,
+                          onDismissed: (_) => _deletePrompt('$id', index),
+                          child: GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder:
+                                      (_) => PromptHistoryDetailScreen(
+                                        entry: item,
+                                      ),
+                                ),
+                              );
+                            },
+                            child: Container(
+                              width: double.infinity,
+                              margin: const EdgeInsets.only(bottom: 12),
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: Colors.white10,
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(color: AppColors.divider),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    title,
+                                    style: const TextStyle(
+                                      color: AppColors.white,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    _formatDate(created),
+                                    style: const TextStyle(
+                                      color: AppColors.textSecondary,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
-                        ],
-                      ),
-                    ),
-                  ),
-                );
-              },
-            );
-          }
-        },
-      ),
+                        );
+                      },
+                    );
+                  }
+                },
+              ),
     );
   }
 }

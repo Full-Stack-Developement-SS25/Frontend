@@ -12,7 +12,6 @@ class _MainNavigationState extends State<MainNavigation> {
   int _currentIndex = 0;
 
   final List<Widget> _pages = [
-    const DashboardScreen(),
     const Placeholder(), // AufgabenScreen
     const Placeholder(), // ScoreboardScreen
     const Placeholder(), // ProfilScreen

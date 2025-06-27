@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../utils/app_colors.dart';
 import '../services/user_service.dart';
-import '../services/badge_service.dart';
 
 class ProfileTabContent extends StatefulWidget {
   const ProfileTabContent({super.key});
@@ -12,6 +11,7 @@ class ProfileTabContent extends StatefulWidget {
 
 class _ProfileTabContentState extends State<ProfileTabContent> {
   late Future<Map<String, dynamic>> _profileDataFuture;
+  bool _isPremium = false;
 
   @override
   void initState() {
@@ -22,6 +22,12 @@ class _ProfileTabContentState extends State<ProfileTabContent> {
   Future<Map<String, dynamic>> _loadProfileData() async {
     final stats = await UserService.getFreshUserStats();
     final summary = await UserService.fetchUserStatsSummary();
+    final isPremium = await UserService.isPremiumUser();
+
+    setState(() {
+      _isPremium = isPremium;
+    });
+
     return {
       ...stats,
       'badgeCount': summary['badgeCount'],
@@ -74,11 +80,89 @@ class _ProfileTabContentState extends State<ProfileTabContent> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
+
+                if (_isPremium) ...[
+                  const SizedBox(height: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.accent,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: const Text(
+                      "Premium Nutzer",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+
                 const SizedBox(height: 30),
                 _infoCard("Level", "$level"),
                 _infoCard("XP", "$xp"),
                 _infoCard("Abgeschlossene Aufgaben", "$completedTasks"),
                 _infoCard("Abzeichen", "$badgeCount"),
+
+                const SizedBox(height: 20),
+
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor:
+                        _isPremium
+                            ? Colors.grey
+                            : AppColors.accent, // Grau wenn Premium
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 16,
+                      horizontal: 32,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  onPressed:
+                      _isPremium
+                          ? null
+                          : () async {
+                            try {
+                              await UserService.buyPremium();
+
+                              if (!mounted) return;
+
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text("✅ Du bist jetzt Premium!"),
+                                  backgroundColor: Colors.green,
+                                ),
+                              );
+
+                              setState(() {
+                                _profileDataFuture = _loadProfileData();
+                              });
+                            } catch (e) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text("❌ Fehler beim Kauf: $e"),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                            }
+                          },
+                  child: Text(
+                    _isPremium
+                        ? "Premium freigeschaltet"
+                        : "Premium freischalten",
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
               ],
             ),
           );

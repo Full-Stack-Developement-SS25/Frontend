@@ -8,6 +8,7 @@ import '../services/user_service.dart';
 import '../services/task_service.dart';
 import '../widgets/section_header.dart';
 import '../services/auth_service.dart';
+import '../utils/premium_required_dialog.dart'; 
 
 class EvaluationScreen extends StatefulWidget {
   final int score;
@@ -15,7 +16,7 @@ class EvaluationScreen extends StatefulWidget {
   final String taskText;
   final String userPrompt;
   final String taskId;
-  final String taskDifficulty; // NEU: Difficulty wird benötigt
+  final String taskDifficulty;
   final List<dynamic>? bestPractices;
   final List<dynamic>? improvementSuggestions;
 
@@ -202,34 +203,79 @@ class _EvaluationScreenState extends State<EvaluationScreen> {
               ),
             ],
 
-            if (_isPremium &&
-                widget.bestPractices != null &&
-                widget.bestPractices!.isNotEmpty) ...[
-              const SizedBox(height: 20),
-              ExpansionTile(
-                title: const Text(
-                  'Best Practices',
-                  style: TextStyle(color: AppColors.white),
-                ),
-                children: widget.bestPractices!
-                    .map(
-                      (s) => ListTile(
-                        title: Text(
-                          s,
-                          style: const TextStyle(color: AppColors.white),
+            const SizedBox(height: 20),
+            ListTile(
+              title: const Text(
+                "Best Practices anzeigen",
+                style: TextStyle(color: AppColors.white),
+              ),
+              trailing: const Icon(
+                Icons.arrow_forward_ios,
+                color: AppColors.accent,
+              ),
+              tileColor: AppColors.fillColor,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              onTap: () {
+                if (_isPremium) {
+                  showDialog(
+                    context: context,
+                    builder: (context) {
+                      return Dialog(
+                        backgroundColor: AppColors.primaryBackground,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
                         ),
-                      ),
-                    )
-                    .toList(),
-              ),
-            ]
-            else if (!_isPremium) ...[
-              const SizedBox(height: 20),
-              const Text(
-                'Best Practices sind nur für Premium-Nutzer verfügbar.',
-                style: TextStyle(color: AppColors.textSecondary),
-              ),
-            ],
+                        child: Padding(
+                          padding: const EdgeInsets.all(20),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Text(
+                                "Best Practices",
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.accent,
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              ...widget.bestPractices!.map(
+                                (e) => Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 4,
+                                  ),
+                                  child: Text(
+                                    "- $e",
+                                    style: const TextStyle(
+                                      color: AppColors.white,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              ElevatedButton(
+                                onPressed: () => Navigator.pop(context),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppColors.accent,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                                child: const Text("Schließen"),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                } else {
+                  showPremiumRequiredDialog(context);
+                }
+              },
+            ),
 
             const Spacer(),
             Row(
@@ -268,12 +314,13 @@ class _EvaluationScreenState extends State<EvaluationScreen> {
                         Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => XPRewardScreen(
-                              xpGained: _xpGained,
-                              oldXP: _oldXP ?? 0,
-                              newXP: _newXP ?? 0,
-                              level: _level ?? 1,
-                            ),
+                            builder:
+                                (context) => XPRewardScreen(
+                                  xpGained: _xpGained,
+                                  oldXP: _oldXP ?? 0,
+                                  newXP: _newXP ?? 0,
+                                  level: _level ?? 1,
+                                ),
                           ),
                         );
                       } catch (e) {
