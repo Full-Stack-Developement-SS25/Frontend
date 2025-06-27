@@ -19,11 +19,14 @@ class TaskListScreen extends StatefulWidget {
 
 class _TaskListScreenState extends State<TaskListScreen> {
   Future<List<Map<String, dynamic>>>? _tasksFuture;
+  bool _isPremiumUser = false;
+  bool _isGenerating = false;
 
   @override
   void initState() {
     super.initState();
     _loadTasks();
+    _checkPremium();
   }
 
   Future<void> _loadTasks() async {
@@ -37,6 +40,36 @@ class _TaskListScreenState extends State<TaskListScreen> {
     }
   }
 
+  Future<void> _checkPremium() async {
+    final premium = await UserService.isPremiumUser();
+    if (!mounted) return;
+    setState(() {
+      _isPremiumUser = premium;
+    });
+  }
+
+  Future<void> _generateTask() async {
+    setState(() {
+      _isGenerating = true;
+    });
+
+    try {
+      await TaskService.generateNewTask();
+      await _loadTasks();
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('❌ $e')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isGenerating = false;
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -46,6 +79,39 @@ class _TaskListScreenState extends State<TaskListScreen> {
         backgroundColor: AppColors.primaryBackground,
         foregroundColor: AppColors.accent,
         elevation: 0,
+        actions: [
+          if (_isPremiumUser)
+            IconButton(
+              tooltip: "Neue Challenge generieren",
+              onPressed: _isGenerating ? null : _generateTask,
+              icon: Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: AppColors.accent,
+                  borderRadius: BorderRadius.circular(50),
+                ),
+                child:
+                    _isGenerating
+                        ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
+                          ),
+                        )
+                        : const Icon(Icons.add, color: Colors.white),
+              ),
+            )
+          else
+            IconButton(
+              tooltip: "Neue Challenge (nur für Premium)",
+              icon: const Icon(Icons.add_circle_outline),
+              onPressed: () {
+                showPremiumRequiredDialog(context);
+              },
+            )
+        ],
       ),
       body: Column(
         children: [

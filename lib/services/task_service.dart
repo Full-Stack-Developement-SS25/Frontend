@@ -50,4 +50,37 @@ class TaskService {
       );
     }
   }
+
+  /// Erstellt eine neue KI-generierte Aufgabe für den aktuellen Nutzer
+  static Future<Map<String, dynamic>> generateNewTask() async {
+    final userId = await AuthService.getUserId();
+    final token = await AuthService.getToken();
+
+    if (userId == null || token == null) {
+      throw Exception('❌ Kein userId oder Token.');
+    }
+
+    final url = Uri.parse('${Config.baseUrl}/user/$userId/task/generate');
+
+    developer.log('Neue Aufgabe generieren: POST $url', name: 'TaskService');
+
+    final response = await http.post(
+      url,
+      headers: {'Authorization': 'Bearer $token'},
+    );
+
+    developer.log(
+      'Antwortstatus: ${response.statusCode}',
+      name: 'TaskService',
+    );
+    developer.log('Antworttext: ${response.body}', name: 'TaskService');
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      return jsonDecode(response.body) as Map<String, dynamic>;
+    } else {
+      throw Exception(
+        '❌ Fehler beim Generieren der Aufgabe: ${response.body}',
+      );
+    }
+  }
 }
