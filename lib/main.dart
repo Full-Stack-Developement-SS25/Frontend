@@ -5,6 +5,7 @@ import 'package:prompt_master/firebase_options.dart';
 import 'screens/login_screen.dart';
 import 'screens/main_navigation.dart';
 import 'screens/reset_password_screen.dart';
+import 'screens/verify_email_screen.dart';
 import 'services/auth_service.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 
@@ -88,6 +89,9 @@ class _MyAppState extends State<MyApp> {
       if (uri.fragment.startsWith('/reset-password') ||
           uri.path == '/reset-password') {
         home = const ResetPasswordScreen();
+      } else if (uri.fragment.startsWith('/verify-email') ||
+          uri.path == '/verify-email') {
+        home = const VerifyEmailScreen();
       } else {
         home = _loggedIn ? const MainNavigation() : const LoginScreen();
       }
@@ -104,6 +108,7 @@ class _MyAppState extends State<MyApp> {
         '/login': (context) => const LoginScreen(),
         '/home': (context) => const MainNavigation(),
         '/reset-password': (context) => const ResetPasswordScreen(),
+        '/verify-email': (context) => const VerifyEmailScreen(),
       },
     );
   }

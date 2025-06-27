@@ -416,4 +416,54 @@ class AuthService {
       rethrow;
     }
   }
+
+  /// Bestätigt die E-Mail-Adresse eines Nutzers
+  static Future<http.Response> verifyEmail(String email, String token) async {
+    final uri = Uri.parse(
+      '$_baseUrl/auth/verify-email',
+    ).replace(queryParameters: {'email': email, 'token': token});
+    try {
+      final response = await http.get(uri);
+      if (response.statusCode != 200) {
+        String errorMsg = 'Unbekannter Fehler';
+        try {
+          final body = json.decode(response.body);
+          errorMsg = body['error'] ?? body['message'] ?? errorMsg;
+        } catch (_) {
+          errorMsg = 'Fehler: ${response.statusCode}';
+        }
+        throw Exception(errorMsg);
+      }
+      return response;
+    } catch (e) {
+      _log.severe('❌ Fehler bei der E-Mail-Bestätigung: $e');
+      rethrow;
+    }
+  }
+
+  /// Sendet die Bestätigungs-E-Mail erneut
+  static Future<http.Response> resendVerification(String email) async {
+    final url = Uri.parse('$_baseUrl/auth/resend-verification');
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({'email': email}),
+      );
+      if (response.statusCode != 200) {
+        String errorMsg = 'Unbekannter Fehler';
+        try {
+          final body = json.decode(response.body);
+          errorMsg = body['error'] ?? body['message'] ?? errorMsg;
+        } catch (_) {
+          errorMsg = 'Fehler: ${response.statusCode}';
+        }
+        throw Exception(errorMsg);
+      }
+      return response;
+    } catch (e) {
+      _log.severe('❌ Fehler beim erneuten Senden der Bestätigung: $e');
+      rethrow;
+    }
+  }
 }
