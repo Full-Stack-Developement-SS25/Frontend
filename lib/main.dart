@@ -82,11 +82,25 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
+    final uri = Uri.base;
+    String normalized;
+    if (kIsWeb) {
+      if (uri.fragment.startsWith('/reset-password')) {
+        normalized = '/reset-password';
+      } else if (uri.path == '/reset-password') {
+        normalized = '/reset-password';
+      } else {
+        normalized = _loggedIn ? '/home' : '/login';
+      }
+    } else {
+      normalized = _loggedIn ? '/home' : '/login';
+    }
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'PromptMaster',
       theme: ThemeData(),
-      initialRoute: _loggedIn ? '/home' : '/login',
+      initialRoute: normalized,
       routes: {
         '/login': (context) => const LoginScreen(),
         '/home': (context) => const MainNavigation(),

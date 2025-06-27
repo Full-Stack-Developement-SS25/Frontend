@@ -21,8 +21,26 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   void initState() {
     super.initState();
     final params = Uri.base.queryParameters;
-    email = params['email'] ?? '';
-    token = params['token'] ?? '';
+    if (params.isNotEmpty) {
+      email = params['email'] ?? '';
+      token = params['token'] ?? '';
+    } else {
+      final fragment = Uri.base.fragment;
+      final idx = fragment.indexOf('?');
+      if (idx != -1) {
+        var fragPart = fragment.substring(idx + 1);
+        final hashIdx = fragPart.indexOf('#');
+        if (hashIdx != -1) {
+          fragPart = fragPart.substring(0, hashIdx);
+        }
+        final fragParams = Uri.splitQueryString(fragPart);
+        email = fragParams['email'] ?? '';
+        token = fragParams['token'] ?? '';
+      } else {
+        email = '';
+        token = '';
+      }
+    }
   }
 
   Future<void> _submit() async {
