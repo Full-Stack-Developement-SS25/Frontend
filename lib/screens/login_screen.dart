@@ -1,9 +1,11 @@
 import 'dart:convert';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:email_validator/email_validator.dart';
 import 'main_navigation.dart';
 import './/utils/app_colors.dart';
 import './/services/auth_service.dart';
+import 'forgot_password_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -20,6 +22,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
   bool isPasswordVisible = false;
   bool isLoginMode = true;
+  bool showResendButton = false;
+  int resendCooldown = 0;
+  Timer? resendTimer;
 
   bool isEmailValid(String email) {
     return EmailValidator.validate(email);
@@ -46,8 +51,24 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final args = ModalRoute.of(context)?.settings.arguments;
+    if (args == 'reset-success') {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Passwort erfolgreich gesetzt.')),
+          );
+        }
+      });
+    }
+  }
+
+  @override
   void dispose() {
     AuthService.jwtTokenNotifier.removeListener(_onTokenChanged);
+    resendTimer?.cancel();
     // Controller dispose etc.
     super.dispose();
   }
@@ -58,6 +79,9 @@ class _LoginScreenState extends State<LoginScreen> {
     final username = usernameController.text.trim();
 
     if (!_formKey.currentState!.validate()) return;
+    setState(() {
+      showResendButton = false;
+    });
 
     try {
       final response =
@@ -85,6 +109,11 @@ class _LoginScreenState extends State<LoginScreen> {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text("Fehler: $errorMsg")));
+        if (errorMsg.contains('E-Mail noch nicht bestätigt')) {
+          setState(() {
+            showResendButton = true;
+          });
+        }
       }
     } catch (e) {
       String message = e.toString();
@@ -94,29 +123,68 @@ class _LoginScreenState extends State<LoginScreen> {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(message.trim())));
+      if (message.contains('E-Mail noch nicht bestätigt')) {
+        setState(() {
+          showResendButton = true;
+        });
+      }
     }
   }
 
-  void handleForgotPassword() {
-    final email = emailController.text.trim();
-    if (!isEmailValid(email)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Bitte eine gültige E-Mail-Adresse eingeben!"),
-        ),
-      );
-      return;
-    }
+  void _startResendCooldown() {
+    resendTimer?.cancel();
+    setState(() {
+      resendCooldown = 60;
+    });
+    resendTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
+      setState(() {
+        resendCooldown--;
+      });
+      if (resendCooldown <= 0) {
+        timer.cancel();
+      }
+    });
+  }
 
-    // Hier könntest du noch eine Funktion im AuthService aufrufen für Passwort zurücksetzen
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-          "Ein Link zum Zurücksetzen des Passworts wurde an Ihre E-Mail gesendet.",
-        ),
+  Future<void> handleResendVerification() async {
+    final email = emailController.text.trim();
+    try {
+      await AuthService.resendVerification(email);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Bestätigungs-E-Mail erneut gesendet.')),
+        );
+      }
+      _startResendCooldown();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Fehler: $e')));
+      }
+    }
+  }
+
+  Future<void> handleForgotPassword() async {
+    final result = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(
+        builder:
+            (_) =>
+                ForgotPasswordScreen(initialEmail: emailController.text.trim()),
       ),
     );
-    Navigator.pop(context);
+    if (result == true && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('E-Mail zum Zurücksetzen wurde gesendet.'),
+        ),
+      );
+    }
   }
 
   void _navigateToDashboard(BuildContext context) {
@@ -326,6 +394,16 @@ class _LoginScreenState extends State<LoginScreen> {
                   TextButton(
                     onPressed: handleForgotPassword,
                     child: const Text("Passwort vergessen?"),
+                  ),
+                if (showResendButton)
+                  TextButton(
+                    onPressed:
+                        resendCooldown > 0 ? null : handleResendVerification,
+                    child: Text(
+                      resendCooldown > 0
+                          ? 'Erneut senden ($resendCooldown)'
+                          : 'Bestätigungs-E-Mail erneut senden',
+                    ),
                   ),
               ],
             ),

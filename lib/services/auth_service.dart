@@ -356,4 +356,114 @@ class AuthService {
       );
     }
   }
+
+  /// Fordert einen Link zum Zurücksetzen des Passworts an
+  static Future<http.Response> forgotPassword(String email) async {
+    final url = Uri.parse('$_baseUrl/auth/forgot-password');
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({'email': email}),
+      );
+      if (response.statusCode != 200) {
+        String errorMsg = 'Unbekannter Fehler';
+        try {
+          final body = json.decode(response.body);
+          errorMsg = body['error'] ?? body['message'] ?? errorMsg;
+        } catch (_) {
+          errorMsg = 'Fehler: ${response.statusCode}';
+        }
+        throw Exception(errorMsg);
+      }
+      return response;
+    } catch (e) {
+      _log.severe('❌ Fehler bei Passwort vergessen: $e');
+      rethrow;
+    }
+  }
+
+  /// Setzt das Passwort mit Token aus der E-Mail neu
+  static Future<http.Response> resetPassword(
+    String email,
+    String token,
+    String newPassword,
+  ) async {
+    final url = Uri.parse('$_baseUrl/auth/reset-password');
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'email': email,
+          'token': token,
+          'newPassword': newPassword,
+        }),
+      );
+      if (response.statusCode != 200) {
+        String errorMsg = 'Unbekannter Fehler';
+        try {
+          final body = json.decode(response.body);
+          errorMsg = body['error'] ?? body['message'] ?? errorMsg;
+        } catch (_) {
+          errorMsg = 'Fehler: ${response.statusCode}';
+        }
+        throw Exception(errorMsg);
+      }
+      return response;
+    } catch (e) {
+      _log.severe('❌ Fehler beim Zurücksetzen des Passworts: $e');
+      rethrow;
+    }
+  }
+
+  /// Bestätigt die E-Mail-Adresse eines Nutzers
+  static Future<http.Response> verifyEmail(String email, String token) async {
+    final uri = Uri.parse(
+      '$_baseUrl/auth/verify-email',
+    ).replace(queryParameters: {'email': email, 'token': token});
+    try {
+      final response = await http.get(uri);
+      if (response.statusCode != 200) {
+        String errorMsg = 'Unbekannter Fehler';
+        try {
+          final body = json.decode(response.body);
+          errorMsg = body['error'] ?? body['message'] ?? errorMsg;
+        } catch (_) {
+          errorMsg = 'Fehler: ${response.statusCode}';
+        }
+        throw Exception(errorMsg);
+      }
+      return response;
+    } catch (e) {
+      _log.severe('❌ Fehler bei der E-Mail-Bestätigung: $e');
+      rethrow;
+    }
+  }
+
+  /// Sendet die Bestätigungs-E-Mail erneut
+  static Future<http.Response> resendVerification(String email) async {
+    final url = Uri.parse('$_baseUrl/auth/resend-verification');
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({'email': email}),
+      );
+      if (response.statusCode != 200) {
+        String errorMsg = 'Unbekannter Fehler';
+        try {
+          final body = json.decode(response.body);
+          errorMsg = body['error'] ?? body['message'] ?? errorMsg;
+        } catch (_) {
+          errorMsg = 'Fehler: ${response.statusCode}';
+        }
+        throw Exception(errorMsg);
+      }
+      return response;
+    } catch (e) {
+      _log.severe('❌ Fehler beim erneuten Senden der Bestätigung: $e');
+      rethrow;
+    }
+  }
 }
