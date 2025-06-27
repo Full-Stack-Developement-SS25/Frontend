@@ -82,19 +82,35 @@ class _TaskListScreenState extends State<TaskListScreen> {
         actions: [
           if (_isPremiumUser)
             IconButton(
+              tooltip: "Neue Challenge generieren",
               onPressed: _isGenerating ? null : _generateTask,
-              tooltip: 'Neue Challenge generieren',
-              icon: _isGenerating
-                  ? const SizedBox(
-                      width: 24,
-                      height: 24,
-                      child: CircularProgressIndicator(
-                        color: AppColors.accent,
-                        strokeWidth: 2,
-                      ),
-                    )
-                  : const Icon(Icons.add_circle_outline),
-            ),
+              icon: Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: AppColors.accent,
+                  borderRadius: BorderRadius.circular(50),
+                ),
+                child:
+                    _isGenerating
+                        ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
+                          ),
+                        )
+                        : const Icon(Icons.add, color: Colors.white),
+              ),
+            )
+          else
+            IconButton(
+              tooltip: "Neue Challenge (nur für Premium)",
+              icon: const Icon(Icons.add_circle_outline),
+              onPressed: () {
+                showPremiumRequiredDialog(context);
+              },
+            )
         ],
       ),
       body: Column(
