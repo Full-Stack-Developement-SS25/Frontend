@@ -165,4 +165,29 @@ class UserService {
     }
   }
 
+  /// Ruft den Premium-Status des aktuell eingeloggten Nutzers ab.
+  /// Wirft eine Exception, falls die Abfrage fehlschlägt.
+  static Future<bool> fetchPremiumStatus() async {
+    final prefs = await SharedPreferences.getInstance();
+    final userId = prefs.getString('user_id');
+    final token = prefs.getString('jwt_token');
+
+    if (userId == null || token == null) {
+      throw Exception('Fehlende Anmeldedaten.');
+    }
+
+    final url = Uri.parse('${Config.baseUrl}/user/$userId/premium');
+    final response = await http.get(
+      url,
+      headers: {'Authorization': 'Bearer $token'},
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      return data['isPremium'] == true;
+    } else {
+      throw Exception('Fehler beim Abrufen des Premium-Status: ${response.body}');
+    }
+  }
+
 }
