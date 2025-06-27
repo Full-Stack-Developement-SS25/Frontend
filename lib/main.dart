@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:prompt_master/firebase_options.dart';
 import 'screens/login_screen.dart';
 import 'screens/main_navigation.dart';
+import 'screens/reset_password_screen.dart';
 import 'services/auth_service.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 
@@ -89,6 +90,7 @@ class _MyAppState extends State<MyApp> {
       routes: {
         '/login': (context) => const LoginScreen(),
         '/home': (context) => const MainNavigation(),
+        '/reset-password': (context) => const ResetPasswordScreen(),
       },
     );
   }

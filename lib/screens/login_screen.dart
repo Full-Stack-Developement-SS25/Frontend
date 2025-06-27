@@ -4,6 +4,7 @@ import 'package:email_validator/email_validator.dart';
 import 'main_navigation.dart';
 import './/utils/app_colors.dart';
 import './/services/auth_service.dart';
+import 'forgot_password_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -42,6 +43,21 @@ class _LoginScreenState extends State<LoginScreen> {
     print("Token geändert: $token");
     if (token != null) {
       _navigateToDashboard(context);
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final args = ModalRoute.of(context)?.settings.arguments;
+    if (args == 'reset-success') {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Passwort erfolgreich gesetzt.')),
+          );
+        }
+      });
     }
   }
 
@@ -97,26 +113,22 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  void handleForgotPassword() {
-    final email = emailController.text.trim();
-    if (!isEmailValid(email)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Bitte eine gültige E-Mail-Adresse eingeben!"),
-        ),
-      );
-      return;
-    }
-
-    // Hier könntest du noch eine Funktion im AuthService aufrufen für Passwort zurücksetzen
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-          "Ein Link zum Zurücksetzen des Passworts wurde an Ihre E-Mail gesendet.",
-        ),
+  Future<void> handleForgotPassword() async {
+    final result = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(
+        builder:
+            (_) =>
+                ForgotPasswordScreen(initialEmail: emailController.text.trim()),
       ),
     );
-    Navigator.pop(context);
+    if (result == true && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('E-Mail zum Zurücksetzen wurde gesendet.'),
+        ),
+      );
+    }
   }
 
   void _navigateToDashboard(BuildContext context) {
