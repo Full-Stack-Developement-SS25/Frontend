@@ -155,4 +155,14 @@ class UserService {
     developer.log('Level erfolgreich aktualisiert: $level', name: 'UserService');
   }
 
+  /// Prüft, ob der aktuell eingeloggte Nutzer Premium ist
+  static Future<bool> isPremiumUser() async {
+    try {
+      final profile = await AuthService.fetchUserProfile();
+      return profile['user']?['premium'] == true;
+    } catch (_) {
+      return false;
+    }
+  }
+
 }
