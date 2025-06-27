@@ -94,7 +94,8 @@ class _TaskListScreenState extends State<TaskListScreen> {
                                 title: task['title'],
                                 difficulty: task['difficulty'].toString(),
                                 onTap: () async {
-                                  if (task['difficulty']?.toString() == 'schwer') {
+                                  final difficulty = task['difficulty']?.toString().toLowerCase();
+                                  if (difficulty == 'schwer') {
                                     final premium = await UserService.isPremiumUser();
                                     if (!premium) {
                                       if (!mounted) return;
