@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:prompt_master/utils/app_colors.dart';
 import 'package:prompt_master/services/badge_service.dart';
 import 'package:prompt_master/models/badge.dart' as model;
 import 'package:prompt_master/widgets/badge_grid.dart';

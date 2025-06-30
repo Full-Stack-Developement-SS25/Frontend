@@ -71,7 +71,6 @@ class UserService {
   }
 
   static Future<List<model.Badge>> fetchUserBadges() async {
-    final prefs = await SharedPreferences.getInstance();
     final userId = await AuthService.getUserId();
 
     if (userId == null) {
@@ -93,7 +92,6 @@ class UserService {
    /// Gibt eine Zusammenfassung der Nutzerstatistiken zurueck
   /// (z.B. Anzahl freigeschalteter Badges und erledigter Aufgaben).
   static Future<Map<String, int>> fetchUserStatsSummary() async {
-    final prefs = await SharedPreferences.getInstance();
     final userId = await AuthService.getUserId();
 
     if (userId == null) {
