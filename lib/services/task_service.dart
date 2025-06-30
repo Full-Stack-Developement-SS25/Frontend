@@ -5,19 +5,25 @@ import 'config.dart';
 import 'auth_service.dart';
 
 class TaskService {
-  static Future<List<Map<String, dynamic>>> fetchTasks() async {
-    final userId = await AuthService.getUserId();
+  static Future<List<Map<String, dynamic>>> fetchTasks(String userId) async {
+    final token = await AuthService.getToken();
 
-    if (userId == null) {
-      throw Exception("❌ Kein Benutzer angemeldet");
+    if (token == null) {
+      throw Exception("❌ Kein Token gefunden");
     }
 
-    final url = Uri.parse('${Config.baseUrl}/tasks/$userId'); // ← wichtig!
+    final url = Uri.parse('${Config.baseUrl}/tasks/$userId');
 
-    final response = await http.get(url);
+    final response = await http.get(
+      url,
+      headers: {'Authorization': 'Bearer $token'},
+    );
 
     developer.log('GET: $url', name: 'TaskService');
-    developer.log('Antwort: ${response.statusCode} – ${response.body}', name: 'TaskService');
+    developer.log(
+      'Antwort: ${response.statusCode} – ${response.body}',
+      name: 'TaskService',
+    );
 
     if (response.statusCode == 200) {
       final List<dynamic> data = jsonDecode(response.body);
@@ -26,6 +32,7 @@ class TaskService {
       throw Exception('❌ Fehler beim Abrufen der Aufgaben: ${response.body}');
     }
   }
+
 
 
   static Future<void> markAsDone(String taskId) async {

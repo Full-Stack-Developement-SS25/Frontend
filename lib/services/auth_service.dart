@@ -60,6 +60,7 @@ class AuthService {
           try {
             final userProfile = await fetchUserProfile();
             final userId = userProfile['user']?['id'];
+            final username = userProfile['user']?['username'];
 
             if (userId != null) {
               if (kIsWeb) {
@@ -71,6 +72,18 @@ class AuthService {
               _log.info('✅ user_id gespeichert: $userId');
             } else {
               _log.warning('⚠️ user_id fehlt im Profil.');
+            }
+
+            if (username != null) {
+              if (kIsWeb) {
+                html.window.localStorage['username'] = username;
+              } else {
+                final prefs = await SharedPreferences.getInstance();
+                await prefs.setString('username', username);
+              }
+              _log.info('✅ username gespeichert: $username');
+            } else {
+              _log.warning('⚠️ username fehlt im Profil.');
             }
           } catch (e) {
             _log.warning('⚠️ Fehler beim Abrufen des Profils: $e');
@@ -165,9 +178,11 @@ class AuthService {
     await _saveToken(null);
     if (kIsWeb) {
       html.window.localStorage.remove('user_id');
+      html.window.localStorage.remove('username');
     } else {
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove('user_id');
+      await prefs.remove('username');
     }
     _log.info('✅ Benutzer abgemeldet, Daten gelöscht.');
   }
@@ -244,6 +259,31 @@ class AuthService {
         final backendToken = body['token'];
         await _saveToken(backendToken);
         _log.info('✅ Backend JWT-Token gespeichert.');
+        try {
+          final profile = await fetchUserProfile();
+          final userId = profile['user']?['id'];
+          final username = profile['user']?['username'];
+          if (userId != null) {
+            if (kIsWeb) {
+              html.window.localStorage['user_id'] = userId;
+            } else {
+              final prefs = await SharedPreferences.getInstance();
+              await prefs.setString('user_id', userId);
+            }
+            _log.info('✅ user_id gespeichert: $userId');
+          }
+          if (username != null) {
+            if (kIsWeb) {
+              html.window.localStorage['username'] = username;
+            } else {
+              final prefs = await SharedPreferences.getInstance();
+              await prefs.setString('username', username);
+            }
+            _log.info('✅ username gespeichert: $username');
+          }
+        } catch (e) {
+          _log.warning('⚠️ Fehler beim Abrufen des Profils: $e');
+        }
       } else {
         final body = json.decode(response.body);
         throw Exception('Backend Login Fehler: ${body['message']}');
@@ -349,6 +389,31 @@ class AuthService {
 
       await _saveToken(token);
       print('✅ JWT Token gespeichert: $token');
+      try {
+        final profile = await fetchUserProfile();
+        final userId = profile['user']?['id'];
+        final username = profile['user']?['username'];
+        if (userId != null) {
+          if (kIsWeb) {
+            html.window.localStorage['user_id'] = userId;
+          } else {
+            final prefs = await SharedPreferences.getInstance();
+            await prefs.setString('user_id', userId);
+          }
+          _log.info('✅ user_id gespeichert: $userId');
+        }
+        if (username != null) {
+          if (kIsWeb) {
+            html.window.localStorage['username'] = username;
+          } else {
+            final prefs = await SharedPreferences.getInstance();
+            await prefs.setString('username', username);
+          }
+          _log.info('✅ username gespeichert: $username');
+        }
+      } catch (e) {
+        _log.warning('⚠️ Fehler beim Abrufen des Profils: $e');
+      }
     } else {
       final body = json.decode(response.body);
       throw Exception(
@@ -356,6 +421,7 @@ class AuthService {
       );
     }
   }
+
 
   /// Fordert einen Link zum Zurücksetzen des Passworts an
   static Future<http.Response> forgotPassword(String email) async {
@@ -466,4 +532,15 @@ class AuthService {
       rethrow;
     }
   }
+
+  /// Username abrufen
+  static Future<String?> getUsername() async {
+    if (kIsWeb) {
+      return html.window.localStorage['username'];
+    } else {
+      final prefs = await SharedPreferences.getInstance();
+      return prefs.getString('username');
+    }
+  }
+
 }

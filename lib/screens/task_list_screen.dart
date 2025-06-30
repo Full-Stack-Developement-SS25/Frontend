@@ -35,7 +35,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
 
     if (userId != null) {
       setState(() {
-        _tasksFuture = TaskService.fetchTasks();
+        _tasksFuture = TaskService.fetchTasks(userId);
       });
     }
   }

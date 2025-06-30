@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../utils/app_colors.dart';
 import '../services/auth_service.dart';
-import '../screens/login_screen.dart';
+import 'login_screen.dart';
 import 'profile_tab_content.dart';
 import 'badges_tab_content.dart';
 
@@ -16,22 +15,11 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  String _username = "User";
 
   @override
   void initState() {
     super.initState();
-    _loadUsername();
     _tabController = TabController(length: 2, vsync: this);
-  }
-
-  Future<void> _loadUsername() async {
-    final prefs = await SharedPreferences.getInstance();
-    if (!mounted) return;
-    final name = prefs.getString('username');
-    setState(() {
-      _username = name ?? "User";
-    });
   }
 
   void _logout() async {
@@ -54,13 +42,19 @@ class _ProfileScreenState extends State<ProfileScreen>
     return Scaffold(
       backgroundColor: AppColors.primaryBackground,
       appBar: AppBar(
-        title: Text(
-          "Hallo, $_username!",
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 32,
-            color: AppColors.accent,
-          ),
+        title: FutureBuilder<String?>(
+          future: AuthService.getUsername(),
+          builder: (context, snapshot) {
+            final username = snapshot.data ?? "User";
+            return Text(
+              "Hallo, $username!",
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 32,
+                color: AppColors.accent,
+              ),
+            );
+          },
         ),
         backgroundColor: AppColors.primaryBackground,
         foregroundColor: AppColors.accent,
@@ -72,9 +66,18 @@ class _ProfileScreenState extends State<ProfileScreen>
             tooltip: 'Logout',
           ),
         ],
-        bottom: TabBar(
-          controller: _tabController,
-          tabs: const [Tab(text: "Profil"), Tab(text: "Badges")],
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(kToolbarHeight),
+          child: FutureBuilder<String?>(
+            future: AuthService.getUsername(),
+            builder: (context, snapshot) {
+              final username = snapshot.data ?? "Profil";
+              return TabBar(
+                controller: _tabController,
+                tabs: [Tab(text: username), const Tab(text: "Badges")],
+              );
+            },
+          ),
         ),
       ),
       body: TabBarView(

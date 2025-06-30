@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../utils/app_colors.dart';
 import '../services/user_service.dart';
+import '../services/auth_service.dart';
 
 class ProfileTabContent extends StatefulWidget {
   const ProfileTabContent({super.key});
@@ -11,12 +12,14 @@ class ProfileTabContent extends StatefulWidget {
 
 class _ProfileTabContentState extends State<ProfileTabContent> {
   late Future<Map<String, dynamic>> _profileDataFuture;
+  late Future<String?> _usernameFuture;
   bool _isPremium = false;
 
   @override
   void initState() {
     super.initState();
     _profileDataFuture = _loadProfileData();
+    _usernameFuture = AuthService.getUsername();
   }
 
   Future<Map<String, dynamic>> _loadProfileData() async {
@@ -51,7 +54,6 @@ class _ProfileTabContentState extends State<ProfileTabContent> {
           );
         } else {
           final data = snapshot.data!;
-          final username = data["username"] ?? "Unbekannt";
           final level = data["level"];
           final xp = data["xp"];
           final completedTasks = data["completedTasks"] ?? 0;
@@ -72,13 +74,21 @@ class _ProfileTabContentState extends State<ProfileTabContent> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                Text(
-                  username,
-                  style: const TextStyle(
-                    fontSize: 24,
-                    color: AppColors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
+
+                /// Username als Future
+                FutureBuilder<String?>(
+                  future: _usernameFuture,
+                  builder: (context, snapshot) {
+                    final username = snapshot.data ?? "Unbekannt";
+                    return Text(
+                      username,
+                      style: const TextStyle(
+                        fontSize: 24,
+                        color: AppColors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    );
+                  },
                 ),
 
                 if (_isPremium) ...[

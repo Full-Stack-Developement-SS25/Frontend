@@ -90,17 +90,27 @@ class _LoginScreenState extends State<LoginScreen> {
               : await AuthService.register(email, password, username);
 
       if (response.statusCode == 200) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              isLoginMode
-                  ? "Erfolgreich eingeloggt als $email"
-                  : "Registrierung erfolgreich. Willkommen $username!",
+        final userId = await _waitForUserId();
+
+        if (userId == null) {
+          throw Exception(
+            "❌ Login erfolgreich, aber userId wurde nicht gespeichert.",
+          );
+        }
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                isLoginMode
+                    ? "Erfolgreich eingeloggt als $email"
+                    : "Registrierung erfolgreich. Willkommen $username!",
+              ),
             ),
-          ),
-        );
+          );
+          _navigateToDashboard(context);
+        }
       } else {
-        // Fehler aus Backend lesen (hier 'error' oder 'message' prüfen)
         final responseBody = jsonDecode(response.body);
         final errorMsg =
             responseBody['error'] ??
@@ -130,6 +140,16 @@ class _LoginScreenState extends State<LoginScreen> {
       }
     }
   }
+
+Future<String?> _waitForUserId({int retries = 10}) async {
+  for (var i = 0; i < retries; i++) {
+    final userId = await AuthService.getUserId();
+    if (userId != null) return userId;
+    await Future.delayed(const Duration(milliseconds: 100));
+  }
+  return null;
+}
+
 
   void _startResendCooldown() {
     resendTimer?.cancel();
@@ -232,6 +252,17 @@ class _LoginScreenState extends State<LoginScreen> {
                   onPressed: () async {
                     try {
                       await AuthService().signInWithGoogle();
+
+                      final userId = await _waitForUserId();
+
+                      if (userId == null) {
+                        throw Exception(
+                          "❌ Google Login erfolgreich, aber userId wurde nicht gespeichert.",
+                        );
+                      }
+
+                      if (!mounted) return;
+                      _navigateToDashboard(context);
                     } catch (e) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
@@ -239,7 +270,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       );
                     }
-                  },
+                  }
                 ),
                 const SizedBox(height: 20),
                 ElevatedButton.icon(
