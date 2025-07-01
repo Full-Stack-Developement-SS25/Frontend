@@ -26,6 +26,7 @@ class _LoginScreenState extends State<LoginScreen> {
   bool showResendButton = false;
   int resendCooldown = 0;
   Timer? resendTimer;
+  bool _resetDialogShown = false;
 
   bool isEmailValid(String email) {
     return EmailValidator.validate(email);
@@ -55,9 +56,10 @@ class _LoginScreenState extends State<LoginScreen> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     final args = ModalRoute.of(context)?.settings.arguments;
-    if (args == 'reset-success') {
+    if (!_resetDialogShown && args == 'reset-success') {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
+          _resetDialogShown = true;
           showSuccessDialog(
             context,
             'Erfolg',
