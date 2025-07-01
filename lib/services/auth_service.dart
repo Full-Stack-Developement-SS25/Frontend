@@ -53,7 +53,6 @@ class AuthService {
           await _saveToken(token);
           final prefs = await SharedPreferences.getInstance();
           await prefs.remove('unlocked_badges');
-          _log.info('✅ JWT-Token gespeichert.');
 
           try {
             final userProfile = await fetchUserProfile();
@@ -232,7 +231,6 @@ class AuthService {
         await _saveToken(backendToken);
         final prefs = await SharedPreferences.getInstance();
         await prefs.remove('unlocked_badges');
-        _log.info('✅ Backend JWT-Token gespeichert.');
         try {
           final profile = await fetchUserProfile();
           final userId = profile['user']?['id'];
@@ -338,7 +336,6 @@ class AuthService {
       await _saveToken(token);
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove('unlocked_badges');
-      print('✅ JWT Token gespeichert: $token');
       try {
         final profile = await fetchUserProfile();
         final userId = profile['user']?['id'];
