@@ -143,22 +143,124 @@ class _ProfileTabContentState extends State<ProfileTabContent> {
 
                               if (!mounted) return;
 
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text("✅ Du bist jetzt Premium!"),
-                                  backgroundColor: Colors.green,
-                                ),
+                              // Erfolgsdialog
+                              showDialog(
+                                context: context,
+                                builder: (context) {
+                                  return Dialog(
+                                    backgroundColor:
+                                        AppColors.primaryBackground,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(20),
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          const Icon(
+                                            Icons.check_circle_outline,
+                                            size: 60,
+                                            color: Colors.green,
+                                          ),
+                                          const SizedBox(height: 16),
+                                          const Text(
+                                            "Kauf erfolgreich!",
+                                            style: TextStyle(
+                                              fontSize: 22,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.green,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 12),
+                                          const Text(
+                                            "Du bist jetzt Premium und hast alle Funktionen freigeschaltet.",
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(
+                                              color: AppColors.white,
+                                              fontSize: 16,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 20),
+                                          ElevatedButton(
+                                            onPressed:
+                                                () => Navigator.pop(context),
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor: Colors.green,
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(12),
+                                              ),
+                                            ),
+                                            child: const Text("Super!"),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                },
                               );
 
                               setState(() {
                                 _profileDataFuture = _loadProfileData();
                               });
                             } catch (e) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text("❌ Fehler beim Kauf: $e"),
-                                  backgroundColor: Colors.red,
-                                ),
+                              // Fehlerdialog
+                              showDialog(
+                                context: context,
+                                builder: (context) {
+                                  return Dialog(
+                                    backgroundColor:
+                                        AppColors.primaryBackground,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(20),
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          const Icon(
+                                            Icons.error_outline,
+                                            size: 60,
+                                            color: Colors.red,
+                                          ),
+                                          const SizedBox(height: 16),
+                                          const Text(
+                                            "Kauf fehlgeschlagen",
+                                            style: TextStyle(
+                                              fontSize: 22,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.red,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 12),
+                                          Text(
+                                            "Beim Kauf ist ein Fehler aufgetreten:\n$e",
+                                            textAlign: TextAlign.center,
+                                            style: const TextStyle(
+                                              color: AppColors.white,
+                                              fontSize: 16,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 20),
+                                          ElevatedButton(
+                                            onPressed:
+                                                () => Navigator.pop(context),
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor: Colors.red,
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(12),
+                                              ),
+                                            ),
+                                            child: const Text("Schließen"),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                },
                               );
                             }
                           },

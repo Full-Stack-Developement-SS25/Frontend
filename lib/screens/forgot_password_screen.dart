@@ -33,14 +33,65 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Fehler: $e')));
+        showDialog(
+          context: context,
+          builder: (context) {
+            return Dialog(
+              backgroundColor: AppColors.primaryBackground,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.error_outline,
+                      size: 60,
+                      color: AppColors.accent,
+                    ),
+                    const SizedBox(height: 16),
+                    const Text(
+                      "Fehler beim Zurücksetzen",
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.accent,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      "Es ist ein Fehler aufgetreten:\n$e",
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        color: AppColors.white,
+                        fontSize: 16,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    ElevatedButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.accent,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: const Text("Schließen"),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
       }
     } finally {
       if (mounted) setState(() => isLoading = false);
     }
   }
+
 
   @override
   Widget build(BuildContext context) {

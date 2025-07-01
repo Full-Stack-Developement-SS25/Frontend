@@ -54,19 +54,65 @@ class _XPRewardScreenState extends State<XPRewardScreen>
     });
   }
 
+
   Future<void> _showNewBadgeInfo() async {
     final newBadges = await BadgeService.checkForNewBadges();
     if (!mounted || newBadges.isEmpty) return;
+
     for (final badge in newBadges) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            '🎉 Du hast das Badge "${badge.title}" freigeschaltet!',
-          ),
-        ),
+      await showDialog(
+        context: context,
+        builder: (context) {
+          return Dialog(
+            backgroundColor: AppColors.primaryBackground,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.emoji_events, size: 60, color: Colors.amber),
+                  const SizedBox(height: 16),
+                  const Text(
+                    "Neues Badge!",
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.amber,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    '🎉 Du hast das Badge "${badge.title}" freigeschaltet!',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      color: AppColors.white,
+                      fontSize: 16,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.accent,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text("Cool!"),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
       );
     }
   }
+
+
 
   @override
   void dispose() {
