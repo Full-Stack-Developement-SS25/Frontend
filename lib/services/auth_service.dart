@@ -55,6 +55,8 @@ class AuthService {
 
         if (token != null) {
           await _saveToken(token);
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.remove('unlocked_badges');
           _log.info('✅ JWT-Token gespeichert.');
 
           try {
@@ -176,11 +178,12 @@ class AuthService {
   /// Token & user_id löschen → Logout
   static Future<void> logout() async {
     await _saveToken(null);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('unlocked_badges');
     if (kIsWeb) {
       html.window.localStorage.remove('user_id');
       html.window.localStorage.remove('username');
     } else {
-      final prefs = await SharedPreferences.getInstance();
       await prefs.remove('user_id');
       await prefs.remove('username');
     }
@@ -258,6 +261,8 @@ class AuthService {
         final body = json.decode(response.body);
         final backendToken = body['token'];
         await _saveToken(backendToken);
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.remove('unlocked_badges');
         _log.info('✅ Backend JWT-Token gespeichert.');
         try {
           final profile = await fetchUserProfile();
@@ -388,6 +393,8 @@ class AuthService {
       }
 
       await _saveToken(token);
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('unlocked_badges');
       print('✅ JWT Token gespeichert: $token');
       try {
         final profile = await fetchUserProfile();
