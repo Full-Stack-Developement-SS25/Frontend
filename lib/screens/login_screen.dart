@@ -61,7 +61,7 @@ class _LoginScreenState extends State<LoginScreen> {
           showSuccessDialog(
             context,
             'Erfolg',
-            'Passwort erfolgreich gesetzt.',
+            'Neues Passwort erfolgreich gesetzt.',
           );
         }
       });
