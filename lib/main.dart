@@ -29,7 +29,6 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
 
-    // Initialer Status prüfen (z.B. Token im SharedPreferences oder localStorage)
     _checkInitialLoginStatus();
 
     html.window.onStorage.listen((event) {
@@ -58,7 +57,6 @@ class _MyAppState extends State<MyApp> {
       return;
     }
 
-    // Prüfen, ob wir von GitHub mit einem Code zurückgeleitet wurden
     if (kIsWeb && Uri.base.path == '/api/auth/github/callback') {
       final code = Uri.base.queryParameters['code'];
       if (code != null) {
@@ -67,7 +65,6 @@ class _MyAppState extends State<MyApp> {
           setState(() {
             _loggedIn = true;
           });
-          // Query-Parameter aus der URL entfernen
           html.window.history.replaceState(null, '', '/');
           return;
         } catch (e) {

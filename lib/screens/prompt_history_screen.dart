@@ -4,7 +4,7 @@ import '../widgets/section_header.dart';
 import '../services/prompt_history_service.dart';
 import '../services/user_service.dart';
 import 'prompt_history_detail_screen.dart';
-import '../utils/premium_required_dialog.dart'; // 🔥 Neuer Import
+import '../utils/premium_required_dialog.dart';
 
 class PromptHistoryScreen extends StatefulWidget {
   const PromptHistoryScreen({super.key});

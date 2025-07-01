@@ -35,18 +35,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
         _userStats = UserService.fetchUserStats(userId);
         _tasksFuture = TaskService.fetchTasks(userId);
       });
-    } else {
-      debugPrint("❌ Kein userId gefunden");
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Fehler: Nicht eingeloggt"),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
+    } else {}
   }
-
-
 
   @override
   Widget build(BuildContext context) {

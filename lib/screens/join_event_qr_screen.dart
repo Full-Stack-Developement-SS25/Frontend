@@ -3,7 +3,6 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 import '../utils/app_colors.dart';
 import '../widgets/section_header.dart';
 
-
 class JoinEventQRScreen extends StatefulWidget {
   const JoinEventQRScreen({super.key});
 
@@ -39,7 +38,6 @@ class _JoinEventQRScreenState extends State<JoinEventQRScreen> {
                     _scanned = true;
                   });
 
-                  // Beispiel: automatisch zurück zur vorherigen Seite
                   Future.delayed(const Duration(milliseconds: 500), () {
                     if (!mounted) return;
                     Navigator.pop(context);

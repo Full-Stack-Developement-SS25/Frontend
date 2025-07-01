@@ -4,7 +4,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
-import 'package:logging/logging.dart';
 import 'package:prompt_master/screens/dashboard_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'config.dart';
@@ -12,13 +11,10 @@ import '../html_universal.dart' as html;
 import 'package:flutter/material.dart';
 
 class AuthService {
-  static final Logger _log = Logger('AuthService');
   static final String _baseUrl = Config.baseUrl;
-
-  /// ValueNotifier für den JWT Token
   static final ValueNotifier<String?> jwtTokenNotifier = ValueNotifier(null);
 
-  /// Intern: Token in Notifier und persistent speichern
+  /// Speichert das JWT-Token im lokalen Speicher (SharedPreferences oder LocalStorage)
   static Future<void> _saveToken(String? token) async {
     jwtTokenNotifier.value = token;
     if (kIsWeb) {
@@ -37,7 +33,7 @@ class AuthService {
     }
   }
 
-  /// Login-Methode: sendet Login-Request, speichert JWT-Token & user_id bei Erfolg
+  /// Loggt den Nutzer ein und speichert das JWT-Token
   static Future<http.Response> login(String email, String password) async {
     final url = Uri.parse('$_baseUrl/auth/login');
 
@@ -55,7 +51,6 @@ class AuthService {
 
         if (token != null) {
           await _saveToken(token);
-          _log.info('✅ JWT-Token gespeichert.');
 
           try {
             final userProfile = await fetchUserProfile();
@@ -69,11 +64,7 @@ class AuthService {
                 final prefs = await SharedPreferences.getInstance();
                 await prefs.setString('user_id', userId);
               }
-              _log.info('✅ user_id gespeichert: $userId');
-            } else {
-              _log.warning('⚠️ user_id fehlt im Profil.');
             }
-
             if (username != null) {
               if (kIsWeb) {
                 html.window.localStorage['username'] = username;
@@ -81,13 +72,8 @@ class AuthService {
                 final prefs = await SharedPreferences.getInstance();
                 await prefs.setString('username', username);
               }
-              _log.info('✅ username gespeichert: $username');
-            } else {
-              _log.warning('⚠️ username fehlt im Profil.');
             }
-          } catch (e) {
-            _log.warning('⚠️ Fehler beim Abrufen des Profils: $e');
-          }
+          } catch (e) {}
         }
       } else {
         final errorMsg =
@@ -97,12 +83,11 @@ class AuthService {
 
       return response;
     } catch (e) {
-      _log.severe('❌ Login fehlgeschlagen: $e');
       rethrow;
     }
   }
 
-  /// Registrierungsmethode: sendet Registrierungs-Request
+  /// Registriert einen neuen Nutzer und speichert das JWT-Token
   static Future<http.Response> register(
     String email,
     String password,
@@ -111,8 +96,6 @@ class AuthService {
     final url = Uri.parse('$_baseUrl/auth/register');
 
     try {
-      _log.info('Registrierung für $email wird gestartet.');
-
       final response = await http.post(
         url,
         headers: {'Content-Type': 'application/json'},
@@ -124,7 +107,6 @@ class AuthService {
       );
 
       if (response.statusCode == 200) {
-        _log.info('✅ Registrierung erfolgreich für $email.');
       } else {
         final body = json.decode(response.body);
         final errorMsg = body['error'] ?? 'Registrierung fehlgeschlagen';
@@ -133,12 +115,11 @@ class AuthService {
 
       return response;
     } catch (e) {
-      _log.severe('❌ Fehler bei der Registrierung: $e');
       rethrow;
     }
   }
 
-  /// Nutzerprofil abrufen
+  /// Ruft das Profil des aktuell eingeloggten Nutzers ab
   static Future<Map<String, dynamic>> fetchUserProfile() async {
     final token = await getToken();
     if (token == null) {
@@ -160,7 +141,7 @@ class AuthService {
     }
   }
 
-  /// Token abrufen
+  /// Gibt das gespeicherte JWT-Token zurück oder null, wenn nicht vorhanden
   static Future<String?> getToken() async {
     if (jwtTokenNotifier.value != null) {
       return jwtTokenNotifier.value;
@@ -173,7 +154,7 @@ class AuthService {
     }
   }
 
-  /// Token & user_id löschen → Logout
+  /// Löscht das JWT-Token und entfernt Nutzerinformationen aus dem lokalen Speicher
   static Future<void> logout() async {
     await _saveToken(null);
     if (kIsWeb) {
@@ -184,16 +165,15 @@ class AuthService {
       await prefs.remove('user_id');
       await prefs.remove('username');
     }
-    _log.info('✅ Benutzer abgemeldet, Daten gelöscht.');
   }
 
-  /// Prüfen, ob Benutzer eingeloggt ist
+  /// Prüft, ob der Nutzer eingeloggt ist (Token vorhanden)
   static Future<bool> isLoggedIn() async {
     final token = await getToken();
     return token != null;
   }
 
-  /// Optional: user_id direkt abrufen
+  /// Gibt die Nutzer-ID des aktuell eingeloggten Nutzers zurück
   static Future<String?> getUserId() async {
     if (kIsWeb) {
       return html.window.localStorage['user_id'];
@@ -211,54 +191,41 @@ class AuthService {
             : null,
   );
 
+  /// Meldet den Nutzer mit Google an und speichert das JWT-Token
   Future<void> signInWithGoogle() async {
     try {
-      // Google Sign-In starten
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
       if (googleUser == null) {
-        _log.info('Google Sign-In abgebrochen');
         return;
       }
-
-      // Authentifizierungsdetails holen
       final GoogleSignInAuthentication googleAuth =
           await googleUser.authentication;
 
-      // Firebase Credential erstellen
       final credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
 
-      // Firebase Login mit Credential
       UserCredential userCredential = await _auth.signInWithCredential(
         credential,
       );
 
-      // Firebase ID Token holen
       String? firebaseIdToken = await userCredential.user?.getIdToken();
 
       if (firebaseIdToken == null) {
         throw Exception("Kein Firebase ID Token erhalten.");
       }
 
-      _log.info('Firebase ID Token erhalten: $firebaseIdToken');
-
-      // Backend mit Firebase Token anfragen (zur eigenen JWT-Erstellung)
       final response = await http.post(
         Uri.parse('$_baseUrl/auth/firebase-login'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({'token': firebaseIdToken}),
       );
 
-      print('Statuscode: ${response.statusCode}');
-      print('Body: ${response.body}');
-
       if (response.statusCode == 200) {
         final body = json.decode(response.body);
         final backendToken = body['token'];
         await _saveToken(backendToken);
-        _log.info('✅ Backend JWT-Token gespeichert.');
         try {
           final profile = await fetchUserProfile();
           final userId = profile['user']?['id'];
@@ -270,7 +237,6 @@ class AuthService {
               final prefs = await SharedPreferences.getInstance();
               await prefs.setString('user_id', userId);
             }
-            _log.info('✅ user_id gespeichert: $userId');
           }
           if (username != null) {
             if (kIsWeb) {
@@ -279,17 +245,13 @@ class AuthService {
               final prefs = await SharedPreferences.getInstance();
               await prefs.setString('username', username);
             }
-            _log.info('✅ username gespeichert: $username');
           }
-        } catch (e) {
-          _log.warning('⚠️ Fehler beim Abrufen des Profils: $e');
-        }
+        } catch (e) {}
       } else {
         final body = json.decode(response.body);
         throw Exception('Backend Login Fehler: ${body['message']}');
       }
     } catch (e) {
-      _log.severe('Fehler bei Google Sign-In: $e');
       rethrow;
     }
   }
@@ -302,7 +264,7 @@ class AuthService {
   static const String _redirectUriGithubAndroid =
       'com.example.promptmaster://callback';
 
-  /// GitHub OAuth Login (dynamisch für Web und Android)
+  /// Meldet den Nutzer mit GitHub an und speichert das JWT-Token
   static Future<void> signInWithGitHub(BuildContext context) async {
     try {
       final String clientId;
@@ -326,14 +288,7 @@ class AuthService {
         'allow_signup': 'true',
       });
 
-      print(
-        'Starte FlutterWebAuth.authenticate mit URL: ${authUrl.toString()} und Scheme: $callbackScheme',
-      );
-
       if (kIsWeb) {
-        // Auf Web-Plattformen leiten wir den Browser direkt zu GitHub um.
-        // Nach erfolgreichem Login wird unsere Anwendung mit dem
-        // "code"-Parameter neu geladen.
         html.window.location.assign(authUrl.toString());
         return;
       }
@@ -342,42 +297,28 @@ class AuthService {
         url: authUrl.toString(),
         callbackUrlScheme: callbackScheme,
       );
-      print('FlutterWebAuth.authenticate erfolgreich, Ergebnis: $result');
 
       final code = Uri.parse(result).queryParameters['code'];
       if (code == null) {
         throw Exception('Kein Code von GitHub erhalten');
       }
-      print('GitHub Auth Code erhalten: $code');
 
       await completeGitHubLogin(code);
-      print('Navigator-Aufruf wird ausgeführt, token gespeichert.');
       Navigator.of(
         context,
       ).pushReplacement(MaterialPageRoute(builder: (_) => DashboardScreen()));
-      // Optional: Token aus Notifier prüfen
-      if (jwtTokenNotifier.value == null) {
-        print('Warnung: JWT Token Notifier hat keinen Wert nach Speicherung');
-      } else {
-        print('JWT Token Notifier Wert: ${jwtTokenNotifier.value}');
-      }
     } catch (e, stacktrace) {
-      print('GitHub Login Fehler: $e');
-      print(stacktrace);
       rethrow;
     }
   }
 
-  /// Verarbeitet den von GitHub erhaltenen Code (Web-Callback)
+  /// Vervollständigt den GitHub Login-Prozess und speichert das JWT-Token
   static Future<void> completeGitHubLogin(String code) async {
     final response = await http.post(
       Uri.parse('$_baseUrl/auth/github-login'),
       headers: {'Content-Type': 'application/json'},
       body: json.encode({'code': code, 'platform': 'web'}),
     );
-
-    print('Backend Response Status: ${response.statusCode}');
-    print('Backend Response Body: ${response.body}');
 
     if (response.statusCode == 200) {
       final body = json.decode(response.body);
@@ -388,7 +329,6 @@ class AuthService {
       }
 
       await _saveToken(token);
-      print('✅ JWT Token gespeichert: $token');
       try {
         final profile = await fetchUserProfile();
         final userId = profile['user']?['id'];
@@ -400,7 +340,6 @@ class AuthService {
             final prefs = await SharedPreferences.getInstance();
             await prefs.setString('user_id', userId);
           }
-          _log.info('✅ user_id gespeichert: $userId');
         }
         if (username != null) {
           if (kIsWeb) {
@@ -409,11 +348,8 @@ class AuthService {
             final prefs = await SharedPreferences.getInstance();
             await prefs.setString('username', username);
           }
-          _log.info('✅ username gespeichert: $username');
         }
-      } catch (e) {
-        _log.warning('⚠️ Fehler beim Abrufen des Profils: $e');
-      }
+      } catch (e) {}
     } else {
       final body = json.decode(response.body);
       throw Exception(
@@ -422,8 +358,7 @@ class AuthService {
     }
   }
 
-
-  /// Fordert einen Link zum Zurücksetzen des Passworts an
+  /// Sendet eine E-Mail zum Zurücksetzen des Passworts
   static Future<http.Response> forgotPassword(String email) async {
     final url = Uri.parse('$_baseUrl/auth/forgot-password');
     try {
@@ -444,12 +379,11 @@ class AuthService {
       }
       return response;
     } catch (e) {
-      _log.severe('❌ Fehler bei Passwort vergessen: $e');
       rethrow;
     }
   }
 
-  /// Setzt das Passwort mit Token aus der E-Mail neu
+  /// Setzt das Passwort zurück
   static Future<http.Response> resetPassword(
     String email,
     String token,
@@ -478,12 +412,11 @@ class AuthService {
       }
       return response;
     } catch (e) {
-      _log.severe('❌ Fehler beim Zurücksetzen des Passworts: $e');
       rethrow;
     }
   }
 
-  /// Bestätigt die E-Mail-Adresse eines Nutzers
+  /// Verifiziert die E-Mail-Adresse des Nutzers
   static Future<http.Response> verifyEmail(String email, String token) async {
     final uri = Uri.parse(
       '$_baseUrl/auth/verify-email',
@@ -502,12 +435,11 @@ class AuthService {
       }
       return response;
     } catch (e) {
-      _log.severe('❌ Fehler bei der E-Mail-Bestätigung: $e');
       rethrow;
     }
   }
 
-  /// Sendet die Bestätigungs-E-Mail erneut
+  /// Sendet eine E-Mail zur erneuten Verifizierung der E-Mail-Adresse
   static Future<http.Response> resendVerification(String email) async {
     final url = Uri.parse('$_baseUrl/auth/resend-verification');
     try {
@@ -528,12 +460,11 @@ class AuthService {
       }
       return response;
     } catch (e) {
-      _log.severe('❌ Fehler beim erneuten Senden der Bestätigung: $e');
       rethrow;
     }
   }
 
-  /// Username abrufen
+  /// Gibt den Benutzernamen des aktuell eingeloggten Nutzers zurück
   static Future<String?> getUsername() async {
     if (kIsWeb) {
       return html.window.localStorage['username'];
@@ -542,5 +473,4 @@ class AuthService {
       return prefs.getString('username');
     }
   }
-
 }
