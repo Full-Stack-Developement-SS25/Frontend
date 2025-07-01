@@ -132,7 +132,7 @@ class _LoginScreenState extends State<LoginScreen> {
             showSuccessDialog(
               context,
               'Registriert',
-              'Registrierung erfolgreich. Bitte einloggen.',
+              'Registrierung erfolgreich. Bitte E-Mail bestätigen zum einloggen.',
             );
             setState(() {
               isLoginMode = true;
