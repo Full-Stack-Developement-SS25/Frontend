@@ -35,12 +35,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
         _userStats = UserService.fetchUserStats(userId);
         _tasksFuture = TaskService.fetchTasks(userId);
       });
-    } else {
-      
-    }
+    } else {}
   }
-
-
 
   @override
   Widget build(BuildContext context) {

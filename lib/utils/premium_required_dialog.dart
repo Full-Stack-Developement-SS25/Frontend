@@ -44,7 +44,7 @@ void showPremiumRequiredDialog(BuildContext context) {
                   ),
                 ),
                 onPressed: () {
-                  Navigator.pop(context); // Dialog schließen
+                  Navigator.pop(context);
                   Navigator.pushAndRemoveUntil(
                     context,
                     MaterialPageRoute(

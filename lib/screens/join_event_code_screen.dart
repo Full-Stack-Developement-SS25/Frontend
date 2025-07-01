@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../utils/app_colors.dart';
 import '../widgets/section_header.dart';
 
-
 class JoinEventCodeScreen extends StatefulWidget {
   const JoinEventCodeScreen({super.key});
 
@@ -35,7 +34,6 @@ class _JoinEventCodeScreenState extends State<JoinEventCodeScreen> {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -50,7 +48,7 @@ class _JoinEventCodeScreenState extends State<JoinEventCodeScreen> {
         padding: const EdgeInsets.all(24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween, // 👈 Das ist der Trick
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             // 🔼 Inhalt oben
             Column(

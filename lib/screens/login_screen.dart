@@ -69,7 +69,7 @@ class _LoginScreenState extends State<LoginScreen> {
   void dispose() {
     AuthService.jwtTokenNotifier.removeListener(_onTokenChanged);
     resendTimer?.cancel();
-    // Controller dispose etc.
+
     super.dispose();
   }
 
@@ -84,45 +84,62 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
-      final response =
-          isLoginMode
-              ? await AuthService.login(email, password)
-              : await AuthService.register(email, password, username);
+      if (isLoginMode) {
+        final response = await AuthService.login(email, password);
 
-      if (response.statusCode == 200) {
-        final userId = await _waitForUserId();
+        if (response.statusCode == 200) {
+          final userId = await _waitForUserId();
 
-        if (userId == null) {
-          throw Exception(
-            "❌ Login erfolgreich, aber userId wurde nicht gespeichert.",
-          );
-        }
+          if (userId == null) {
+            throw Exception(
+              "❌ Login erfolgreich, aber userId wurde nicht gespeichert.",
+            );
+          }
 
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                isLoginMode
-                    ? "Erfolgreich eingeloggt als $email"
-                    : "Registrierung erfolgreich. Willkommen $username!",
-              ),
-            ),
-          );
-          _navigateToDashboard(context);
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text("Erfolgreich eingeloggt als $email")),
+            );
+            _navigateToDashboard(context);
+          }
+        } else {
+          final responseBody = jsonDecode(response.body);
+          final errorMsg =
+              responseBody['error'] ??
+              responseBody['message'] ??
+              "Unbekannter Fehler";
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text("Fehler: $errorMsg")));
+          if (errorMsg.contains('E-Mail noch nicht bestätigt')) {
+            setState(() {
+              showResendButton = true;
+            });
+          }
         }
       } else {
-        final responseBody = jsonDecode(response.body);
-        final errorMsg =
-            responseBody['error'] ??
-            responseBody['message'] ??
-            "Unbekannter Fehler";
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text("Fehler: $errorMsg")));
-        if (errorMsg.contains('E-Mail noch nicht bestätigt')) {
-          setState(() {
-            showResendButton = true;
-          });
+        final response = await AuthService.register(email, password, username);
+
+        if (response.statusCode == 200) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Registrierung erfolgreich. Bitte einloggen.'),
+              ),
+            );
+            setState(() {
+              isLoginMode = true;
+            });
+          }
+        } else {
+          final responseBody = jsonDecode(response.body);
+          final errorMsg =
+              responseBody['error'] ??
+              responseBody['message'] ??
+              "Unbekannter Fehler";
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text("Fehler: $errorMsg")));
         }
       }
     } catch (e) {
@@ -141,15 +158,14 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-Future<String?> _waitForUserId({int retries = 10}) async {
-  for (var i = 0; i < retries; i++) {
-    final userId = await AuthService.getUserId();
-    if (userId != null) return userId;
-    await Future.delayed(const Duration(milliseconds: 100));
+  Future<String?> _waitForUserId({int retries = 10}) async {
+    for (var i = 0; i < retries; i++) {
+      final userId = await AuthService.getUserId();
+      if (userId != null) return userId;
+      await Future.delayed(const Duration(milliseconds: 100));
+    }
+    return null;
   }
-  return null;
-}
-
 
   void _startResendCooldown() {
     resendTimer?.cancel();
@@ -270,7 +286,7 @@ Future<String?> _waitForUserId({int retries = 10}) async {
                         ),
                       );
                     }
-                  }
+                  },
                 ),
                 const SizedBox(height: 20),
                 ElevatedButton.icon(

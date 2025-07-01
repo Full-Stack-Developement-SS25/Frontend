@@ -13,7 +13,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'PromptMaster',
       theme: ThemeData(primarySwatch: Colors.purple),
-      home: const DashboardScreen(), // vorerst direkt Dashboard zum Start
+      home: const DashboardScreen(),
     );
   }
 }
