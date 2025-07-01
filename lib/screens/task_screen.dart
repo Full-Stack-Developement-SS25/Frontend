@@ -6,6 +6,7 @@ import '../services/ai_service.dart';
 import '../services/config.dart';
 import '../services/user_service.dart';
 import '../utils/premium_required_dialog.dart';
+import '../utils/custom_dialog.dart';
 import 'evaluation_screen.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -267,10 +268,10 @@ class _TaskScreenState extends State<TaskScreen> {
                                 ),
                               );
                             } else {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text("Fehler bei der Bewertung"),
-                                ),
+                              showErrorDialog(
+                                context,
+                                'Fehler',
+                                'Fehler bei der Bewertung',
                               );
                             }
                           }

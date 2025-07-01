@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
 import '../utils/app_colors.dart';
+import '../utils/custom_dialog.dart';
 import 'login_screen.dart';
 
 class ResetPasswordScreen extends StatefulWidget {
@@ -63,9 +64,11 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
+        showErrorDialog(
           context,
-        ).showSnackBar(SnackBar(content: Text('Fehler: $e')));
+          'Fehler',
+          'Fehler: $e',
+        );
       }
     } finally {
       if (mounted) setState(() => isLoading = false);

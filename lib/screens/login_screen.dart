@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:email_validator/email_validator.dart';
 import 'main_navigation.dart';
 import './/utils/app_colors.dart';
+import '../utils/custom_dialog.dart';
 import './/services/auth_service.dart';
 import 'forgot_password_screen.dart';
 
@@ -57,8 +58,10 @@ class _LoginScreenState extends State<LoginScreen> {
     if (args == 'reset-success') {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Passwort erfolgreich gesetzt.')),
+          showSuccessDialog(
+            context,
+            'Erfolg',
+            'Passwort erfolgreich gesetzt.',
           );
         }
       });
@@ -97,8 +100,10 @@ class _LoginScreenState extends State<LoginScreen> {
           }
 
           if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text("Erfolgreich eingeloggt als $email")),
+            showSuccessDialog(
+              context,
+              'Eingeloggt',
+              'Erfolgreich eingeloggt als $email',
             );
             _navigateToDashboard(context);
           }
@@ -108,9 +113,11 @@ class _LoginScreenState extends State<LoginScreen> {
               responseBody['error'] ??
               responseBody['message'] ??
               "Unbekannter Fehler";
-          ScaffoldMessenger.of(
+          showErrorDialog(
             context,
-          ).showSnackBar(SnackBar(content: Text("Fehler: $errorMsg")));
+            'Fehler',
+            'Fehler: $errorMsg',
+          );
           if (errorMsg.contains('E-Mail noch nicht bestätigt')) {
             setState(() {
               showResendButton = true;
@@ -122,10 +129,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
         if (response.statusCode == 200) {
           if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Registrierung erfolgreich. Bitte einloggen.'),
-              ),
+            showSuccessDialog(
+              context,
+              'Registriert',
+              'Registrierung erfolgreich. Bitte einloggen.',
             );
             setState(() {
               isLoginMode = true;
@@ -137,9 +144,11 @@ class _LoginScreenState extends State<LoginScreen> {
               responseBody['error'] ??
               responseBody['message'] ??
               "Unbekannter Fehler";
-          ScaffoldMessenger.of(
+          showErrorDialog(
             context,
-          ).showSnackBar(SnackBar(content: Text("Fehler: $errorMsg")));
+            'Fehler',
+            'Fehler: $errorMsg',
+          );
         }
       }
     } catch (e) {
@@ -147,9 +156,11 @@ class _LoginScreenState extends State<LoginScreen> {
       if (message.startsWith('Exception:')) {
         message = message.replaceFirst('Exception: ', '');
       }
-      ScaffoldMessenger.of(
+      showErrorDialog(
         context,
-      ).showSnackBar(SnackBar(content: Text(message.trim())));
+        'Fehler',
+        message.trim(),
+      );
       if (message.contains('E-Mail noch nicht bestätigt')) {
         setState(() {
           showResendButton = true;
@@ -191,16 +202,20 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       await AuthService.resendVerification(email);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Bestätigungs-E-Mail erneut gesendet.')),
+        showInfoDialog(
+          context,
+          'E-Mail gesendet',
+          'Bestätigungs-E-Mail erneut gesendet.',
         );
       }
       _startResendCooldown();
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
+        showErrorDialog(
           context,
-        ).showSnackBar(SnackBar(content: Text('Fehler: $e')));
+          'Fehler',
+          'Fehler: $e',
+        );
       }
     }
   }
@@ -215,10 +230,10 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
     );
     if (result == true && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('E-Mail zum Zurücksetzen wurde gesendet.'),
-        ),
+      showInfoDialog(
+        context,
+        'E-Mail gesendet',
+        'E-Mail zum Zurücksetzen wurde gesendet.',
       );
     }
   }
@@ -280,10 +295,10 @@ class _LoginScreenState extends State<LoginScreen> {
                       if (!mounted) return;
                       _navigateToDashboard(context);
                     } catch (e) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('Google Anmeldung fehlgeschlagen: $e'),
-                        ),
+                      showErrorDialog(
+                        context,
+                        'Fehler',
+                        'Google Anmeldung fehlgeschlagen: $e',
                       );
                     }
                   },
@@ -313,10 +328,10 @@ class _LoginScreenState extends State<LoginScreen> {
                       await AuthService.signInWithGitHub(context);
                       // Navigation entfällt, Listener übernimmt das
                     } catch (e) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('GitHub Anmeldung fehlgeschlagen: $e'),
-                        ),
+                      showErrorDialog(
+                        context,
+                        'Fehler',
+                        'GitHub Anmeldung fehlgeschlagen: $e',
                       );
                     }
                   },

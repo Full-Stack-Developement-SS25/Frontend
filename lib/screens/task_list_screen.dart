@@ -9,6 +9,7 @@ import 'prompt_history_screen.dart';
 import '../services/user_service.dart';
 import '../utils/app_colors.dart';
 import '../utils/premium_required_dialog.dart';
+import '../utils/custom_dialog.dart';
 
 class TaskListScreen extends StatefulWidget {
   const TaskListScreen({super.key});
@@ -58,8 +59,10 @@ class _TaskListScreenState extends State<TaskListScreen> {
       await _loadTasks();
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('❌ $e')),
+      showErrorDialog(
+        context,
+        'Fehler',
+        '❌ $e',
       );
     } finally {
       if (mounted) {

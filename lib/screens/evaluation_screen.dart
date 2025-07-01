@@ -8,7 +8,8 @@ import '../services/user_service.dart';
 import '../services/task_service.dart';
 import '../widgets/section_header.dart';
 import '../services/auth_service.dart';
-import '../utils/premium_required_dialog.dart'; 
+import '../utils/premium_required_dialog.dart';
+import '../utils/custom_dialog.dart';
 
 class EvaluationScreen extends StatefulWidget {
   final int score;
@@ -324,8 +325,10 @@ class _EvaluationScreenState extends State<EvaluationScreen> {
                           ),
                         );
                       } catch (e) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Fehler beim Markieren: $e')),
+                        showErrorDialog(
+                          context,
+                          'Fehler',
+                          'Fehler beim Markieren: $e',
                         );
                       }
                     },
