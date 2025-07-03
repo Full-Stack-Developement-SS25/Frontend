@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'html_universal.dart' as html;
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -34,12 +36,10 @@ class _MyAppState extends State<MyApp> {
     html.window.onStorage.listen((event) {
       if (event.key == 'jwt_token') {
         if (event.newValue != null) {
-          print('Token gesetzt, Nutzer eingeloggt!');
           setState(() {
             _loggedIn = true;
           });
         } else {
-          print('Token gelöscht, Nutzer ausgeloggt!');
           setState(() {
             _loggedIn = false;
           });
@@ -67,8 +67,8 @@ class _MyAppState extends State<MyApp> {
           });
           html.window.history.replaceState(null, '', '/');
           return;
-        } catch (e) {
-          print('GitHub Callback Fehler: $e');
+        } catch (e, st) {
+          log('Fehler: $e', stackTrace: st);
         }
       }
     }

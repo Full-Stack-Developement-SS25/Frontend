@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
@@ -75,7 +76,9 @@ class AuthService {
                 await prefs.setString('username', username);
               }
             }
-          } catch (e) {}
+          } catch (e, st) {
+            log('Fehler: $e', stackTrace: st);
+          }
         }
       } else {
         final errorMsg =
@@ -251,7 +254,9 @@ class AuthService {
               await prefs.setString('username', username);
             }
           }
-        } catch (e) {}
+        } catch (e, st) {
+          log('Fehler: $e', stackTrace: st);
+        }
       } else {
         final body = json.decode(response.body);
         throw Exception('Backend Login Fehler: ${body['message']}');
@@ -312,7 +317,7 @@ class AuthService {
       Navigator.of(
         context,
       ).pushReplacement(MaterialPageRoute(builder: (_) => DashboardScreen()));
-    } catch (e, stacktrace) {
+    } catch (e) {
       rethrow;
     }
   }
@@ -356,7 +361,9 @@ class AuthService {
             await prefs.setString('username', username);
           }
         }
-      } catch (e) {}
+      } catch (e, st) {
+        log('Fehler: $e', stackTrace: st);
+      }
     } else {
       final body = json.decode(response.body);
       throw Exception(

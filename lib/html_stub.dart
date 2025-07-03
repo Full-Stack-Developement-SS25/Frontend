@@ -1,5 +1,3 @@
-library html_stub;
-
 class StorageEvent {
   final String? key;
   final String? newValue;
